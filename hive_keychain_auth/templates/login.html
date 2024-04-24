@@ -1,0 +1,17 @@
+{% extends "login_base.html" %}
+
+{% block login_form %}
+<div style="display: none;" id="keychainError">Please install the <a href="https://hive-keychain.com/">Hive Keychain browser extension</a></div>
+
+<h1>Login with Hive Keychain</h1>
+<div>
+    <form id="login_form">
+        <input type="text" id="username" placeholder="Hive username" />
+        <button id="loginBtn">Login</button>
+        <button id="loginLoading" style="display: none;" disabled>
+            <img src="{{ url_for('hive_keychain_auth.static', filename='img/counterrotation.gif') }}" style="height: 1em; " />
+        </button>
+    </form>
+</div>
+<script src="{{ url_for('hive_keychain_auth.static', filename='js/login.js') }}"></script>
+{% endblock %}
