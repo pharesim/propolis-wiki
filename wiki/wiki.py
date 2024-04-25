@@ -7,6 +7,8 @@ from werkzeug.exceptions import abort
 from beem.account import Account
 from beem.comment import Comment
 
+from markupsafe import Markup
+
 bp = Blueprint('wiki', __name__)
 
 def hive_broadcast(op):
@@ -69,7 +71,8 @@ def edit(article_title):
     if 'username' in session.keys():
         try:
             post = Comment(current_app.config['WIKI_USER']+"/"+article_title[:1].lower()+article_title[1:])
-            return render_template('edit.html',post=post,article_title=article_title)
+            body = Markup(post.body);
+            return render_template('edit.html',post=post,body=body,article_title=article_title)
     
         except:
             return redirect('/create/'+article_title)
@@ -108,7 +111,7 @@ def source(hive_post):
     hive_post = hive_post[:1].lower()+hive_post[1:]
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
-        return render_template('source.html',post=post,article_title=hive_post[:1].upper()+hive_post[1:])
+        return render_template('source.html',post=post,body=newbody,article_title=hive_post[:1].upper()+hive_post[1:])
     
     except:
         return redirect('/create/'+hive_post)

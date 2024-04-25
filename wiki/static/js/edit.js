@@ -19,16 +19,14 @@ const editor = new Editor({
     hideModeSwitch: false,
 });
 
+var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
+
 var btn = document.getElementById('submit');
 function enableSubmit() {
     btn.disabled = true;
     if(title_input_error == 0 && topics_input_error == 0 && exists_error == 0) {
         btn.disabled = false;
     }
-    console.log(title_input_error);
-    console.log(topics_input_error);
-    console.log(exists_error);
-    console.log(btn.disabled);
 }
 
 // validate topics
@@ -72,8 +70,6 @@ function checkExists(permlink) {
     exists_error = 0;
     document.getElementById("title_exists_warning").style.display = 'none';
     if(where == 'create') {
-        var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
-    
         client.database.call('get_content', [wiki_user, permlink]).then(result => {
             document.getElementById("title_exists_warning").style.display = 'block';
             document.getElementById("existing_article").innerHTML = '<a href="/wiki/'+result.title+'">/wiki/'+result.title+'</a>';
@@ -85,27 +81,33 @@ function checkExists(permlink) {
     enableSubmit();
 }
 
-btn.addEventListener('click', function() {
-    btn.style.display = 'none';
-    document.getElementById("loading").style.display = 'block';
-    
-    if(!confirm('Do you want to save the article to the blockchain?')) {
-        btn.style.display = 'block';
-        document.getElementById("loading").style.display = 'none';
-        return false;
-    }
-    var title = title_input.value.trim();
-    var topics = topics_input.value.trim().split(' ');
-    topics.unshift('Wiki')
-    var permlink = title.replace(/\W+/g, '-').toLowerCase().replace(/-+$/,'');
-
-    const keychain = window.hive_keychain;
-    var t = "[";
-    topics.forEach(function(topic) {
-        t += "\""+topic.toLowerCase()+"\",";
+function patchBody(permlink,newBody,t) {
+    client.database.call('get_content', [wiki_user, permlink]).then(result => {
+        var dmp = new diff_match_patch();
+        var diff = dmp.diff_main(result.body, newBody);
+        // Result: [(-1, "Hell"), (1, "G"), (0, "o"), (1, "odbye"), (0, " World.")]
+        dmp.diff_cleanupSemantic(diff);
+        // Result: [(-1, "Hello"), (1, "Goodbye"), (0, " World.")]
+        patch = dmp.patch_make(result.body, diff);
+        patch_body = dmp.patch_toText(patch);
+        if (patch_body.length < result.body.length) { 
+            new_body = patch_body;
+        } else {
+            new_body = newBody;
+        }
+        console.log(result.body);
+        console.log(newBody);
+        console.log(patch_body);
+        
+        if(confirm(new_body)) {
+            broadcastEdit(title, new_body, permlink, t);
+        }
     });
-    t = t.replace(/,+$/,'');
-    t += "]";
+    
+}
+
+function broadcastEdit(title,body,permlink,t) {
+    const keychain = window.hive_keychain;
     keychain.requestBroadcast(
         wiki_user,
         [[
@@ -113,7 +115,7 @@ btn.addEventListener('click', function() {
             {
                 author: wiki_user,
                 title: title,
-                body: editor.getMarkdown(),
+                body: body,
                 parent_author: '',
                 parent_permlink: 'wiki',
                 permlink: permlink,
@@ -131,6 +133,37 @@ btn.addEventListener('click', function() {
             }
         }
     );
+}
+
+btn.addEventListener('click', function() {
+    btn.style.display = 'none';
+    document.getElementById("loading").style.display = 'block';
+    
+    if(!confirm('Do you want to save the article to the blockchain?')) {
+        btn.style.display = 'block';
+        document.getElementById("loading").style.display = 'none';
+        return false;
+    }
+    var title = title_input.value.trim();
+    var topics = topics_input.value.trim().split(' ');
+    topics.unshift('Wiki')
+    var permlink = title.replace(/\W+/g, '-').toLowerCase().replace(/-+$/,'');
+
+    
+    var t = "[";
+    topics.forEach(function(topic) {
+        t += "\""+topic.toLowerCase()+"\",";
+    });
+    t = t.replace(/,+$/,'');
+    t += "]";
+    
+    let body = editor.getMarkdown();
+    if(where == 'edit') {
+        body = editor.getMarkdown();
+        body = patchBody(permlink, body, t);
+    } else { 
+        broadcastEdit(title, body, permlink, t);
+    }
 });
 
 checkTopics();

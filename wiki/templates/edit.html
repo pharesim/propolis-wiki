@@ -8,6 +8,7 @@
 <br />
 {% else %}
 {% set where = 'edit' %}
+<script src="{{ url_for('static', filename='js/vendor/diff-match-patch.js') }}"></script>
 {% endif %}
 
 <input type="text" {% if where == 'create' %}placeholder="Create a new article" {% endif %}id="title" {% if where == 'edit' and session.userlevel < 2 %}disabled {% endif %}class="pagetitle" value="{{ article_title }}" />
