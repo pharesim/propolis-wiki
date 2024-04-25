@@ -8,15 +8,6 @@ from beemgraphenebase.ecdsasig import verify_message
 
 from binascii import hexlify, unhexlify
 
-app = Flask(__name__)
-
-app.config.from_pyfile('../config.default.py')
-app.config.from_pyfile('../config.py')
-app.config['SESSION_REDIS'] = redis.from_url(app.config['SESSION_REDIS'])
-app.secret_key = app.config['SECRET_KEY']
-
-server_session = Session(app)
-
 hive_keychain_auth = Blueprint(
     'hive_keychain_auth',
     __name__,

@@ -9,9 +9,9 @@
         <input type="text" id="username" placeholder="Hive username" />
         <button id="loginBtn">Login</button>
         <button id="loginLoading" style="display: none;" disabled>
-            <img src="{{ url_for('hive_keychain_auth.static', filename='img/counterrotation.gif') }}" style="height: 1em; " />
+            <img src="{{ url_for('wiki.hive_keychain_auth.static', filename='img/counterrotation.gif') }}" style="height: 1em; " />
         </button>
     </form>
 </div>
-<script src="{{ url_for('hive_keychain_auth.static', filename='js/login.js') }}"></script>
+<script src="{{ url_for('wiki.hive_keychain_auth.static', filename='js/login.js') }}"></script>
 {% endblock %}

@@ -1,0 +1,13 @@
+[project]
+name = "wiki"
+version = "0.1"
+description = "A wiki built on HIVE"
+dependencies = [
+    "flask",
+    "flask_session",
+    "beem"
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
