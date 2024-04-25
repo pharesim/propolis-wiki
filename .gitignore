@@ -1,4 +1,6 @@
 config.py
 wiki/hive_keychain_auth/__pycache__/
-dist/
+wiki/__pycache__/
+build/
 wiki.egg-info/
+.venv

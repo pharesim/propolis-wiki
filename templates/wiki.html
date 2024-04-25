@@ -1,7 +1,0 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<h1 id="title">{{ post.title }}</h1>
-{% include 'helpers/editor.html' %}
-<script src="{{ url_for('static', filename='js/wiki.js') }}"></script>
-{% endblock %}
