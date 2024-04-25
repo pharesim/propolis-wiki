@@ -22,9 +22,13 @@ const editor = new Editor({
 var btn = document.getElementById('submit');
 function enableSubmit() {
     btn.disabled = true;
-    if(title_input_error == 0 && topics_input_error == 0) {
+    if(title_input_error == 0 && topics_input_error == 0 && exists_error == 0) {
         btn.disabled = false;
     }
+    console.log(title_input_error);
+    console.log(topics_input_error);
+    console.log(exists_error);
+    console.log(btn.disabled);
 }
 
 // validate topics
@@ -33,7 +37,7 @@ var topics_input = document.getElementById('topics');
 var topics_space_warning = document.getElementById('topics_space_warning');
 function checkTopics() {
     let value = topics_input.value;
-    if(value.includes(',')) {
+    if([',',';'].some(v => value.includes(v))) {
         topics_space_warning.style.display = 'block';
         topics_input_error = 1;
     } else {
@@ -58,12 +62,28 @@ function checkTitle() {
         title_input_error = 0;
     }
     let permlink = value.replace(/\W+/g, '-').toLowerCase().replace(/-+$/,'');
-    // @todo
-    // get post with permlink to see if exists
-    // if yes show #title_exists_warning and set link in #existing_article
+    checkExists(permlink); 
+}
+title_input.onkeyup = function() { checkTitle(); }; 
+
+// check if article exists
+var exists_error = 0;
+function checkExists(permlink) {
+    exists_error = 0;
+    document.getElementById("title_exists_warning").style.display = 'none';
+    if(where == 'create') {
+        var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
+    
+        client.database.call('get_content', [wiki_user, permlink]).then(result => {
+            document.getElementById("title_exists_warning").style.display = 'block';
+            document.getElementById("existing_article").innerHTML = '<a href="/wiki/'+result.title+'">/wiki/'+result.title+'</a>';
+            exists_error = 1;
+            enableSubmit();
+        });
+    }
+
     enableSubmit();
 }
-title_input.onkeyup = function() { checkTitle() }; 
 
 btn.addEventListener('click', function() {
     btn.style.display = 'none';

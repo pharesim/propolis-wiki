@@ -27,5 +27,8 @@
 <button id="loading" style="display: none;" disabled>
   <img src="{{ url_for('wiki.hive_keychain_auth.static', filename='img/counterrotation.gif') }}" style="height: 1em; " />
 </button>
+<script>
+  const where = "{{ where }}";
+</script>
 <script src="{{ url_for('static', filename='js/edit.js') }}"></script>
 {% endblock %}
