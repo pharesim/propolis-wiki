@@ -1,6 +1,6 @@
 [project]
-name = "wiki"
-version = "0.1"
+name = "propolis-wiki"
+version = "0.1.1"
 description = "A wiki built on HIVE"
 dependencies = [
     "flask",
