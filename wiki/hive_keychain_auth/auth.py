@@ -26,7 +26,7 @@ def login(redirect_url = ''):
 @hive_keychain_auth.route("/logout")
 def logout():
     session.pop('username',None)
-    return redirect(url_for('hive_keychain_auth.login'))
+    return redirect(url_for('wiki.hive_keychain_auth.login'))
 
 @hive_keychain_auth.route('/verify-login', methods=['POST'])
 def verify_login():
