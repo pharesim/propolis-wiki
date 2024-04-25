@@ -112,18 +112,43 @@ def parseBody(oldBody):
         if(i > 0):
             refrest = val.split("</ref>")
             if refrest[0] not in references.keys():
-                references[refrest[0]] = 1)
+                references[refrest[0]] = 1
                 num = len(references)
             else:
                 references[refrest[0]] = references[refrest[0]]+1
                 num = list(references).index(refrest[0])+1
-            new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'">['+str(num)+"]</a></sup>"
+            new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'_'+str(references[refrest[0]])+'">['+str(num)+"]</a></sup>"
             new_body += refrest[1]
 
     if len(references) > 0:
-        new_body += "\n\n## References\n"
-        for i, val in enumerate(references):
-            new_body += str(i+1)+'. <a class="toref" href="#cite_ref'+str(i+1)+'">↑</a> <span id="reference_'+str(i+1)+'">'+val+"</span>\n"
+        new_body += "\n## References\n"
+        i = 0
+        for val, times in references.items():
+            new_body += str(i+1)+'. ';
+            j = 0
+            while(j < times):
+                j = j+1
+                new_body += '<a class="toref" href="#cite_ref'+str(i+1)+'_'+str(j)+'">↑</a> ';
+            new_body += '<span id="reference_'+str(i+1)+'">'+val+"</span>\n"
+            i = i+1
+
+    related = []
+    relsplit = new_body.split("](/wiki/")
+    if(len(relsplit) > 1):
+        for i, val in enumerate(relsplit):
+            if(i > 0):
+                relrest = val.split(")")
+                link = relrest[0]
+                rel = '['+title+'](/wiki/'+link+')'
+                if rel not in related:
+                    related.append(rel)
+            relrest = val.split("[")
+            title = relrest[-1]    
+
+    if len(related) > 0:
+        new_body += "\n## Related Articles\n"
+        for val in related:
+            new_body += val+"\n"
 
     return new_body
     
