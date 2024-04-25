@@ -93,7 +93,7 @@ function patchBody(permlink,newBody,t) {
         } else {
             new_body = newBody;
         }
-        broadcastEdit(title, new_body, permlink, t);
+        broadcastEdit(result.title, new_body, permlink, t);
     });
 }
 
@@ -115,6 +115,7 @@ function broadcastEdit(title,body,permlink,t) {
         ]],
         'Posting',
         (response) => {
+            console.log(body);
             console.log(response);
             if(response.success == true) {
                 window.location.replace("/wiki/"+permlink);
@@ -137,7 +138,9 @@ btn.addEventListener('click', function() {
     }
     var title = title_input.value.trim();
     var topics = topics_input.value.trim().split(' ');
-    topics.unshift('Wiki')
+    if(!topics.includes('wiki')) {
+        topics.unshift('wiki');
+    }
     var permlink = title.replace(/\W+/g, '-').toLowerCase().replace(/-+$/,'');
 
     

@@ -150,6 +150,30 @@ def parseBody(oldBody):
         for val in related:
             new_body += val+"\n"
 
+    headers = new_body.split("##")
+    if(len(headers) > 1):
+        contents = '<div class="contentsPanel"><div class="contentsHeader">Contents</div>'
+        for i, val in enumerate(headers):
+            if(i > 0):
+                contents += str(i)+'. <a href="#">'+val.split("\n")[0]+'</a><br>'
+
+        contents += '</div>'
+        new_body = contents+new_body
+        
+        #    <ul>
+        #        <li><span>1.1</span><a href="#">Camel's hair pencil</a> </li>
+        #        <li><span>1.2</span><a href="#">Discovery of graphite deposit</a> </li>
+        #        <li><span>1.3</span><a href="#">Wood holders added </a></li>
+        #        <li><span>1.4</span><a href="#">The pencil in America </a></li>
+        #        <li><span>1.5</span><a href="#">Eraser attached </a></li>							
+        #        <li><span>1.6</span><a href="#">Marking material </a></li>							
+        #        <li><span>1.7</span><a href="#">Pencil extenders </a></li>							
+        #    </ul>
+        #</li>
+        #<li><span>2</span><a href="#">Health</a></li>
+        #<li><span>3</span><a href="#">Manufacture</a></li>
+        #<li><span>4</span><a href="#">Grading and classification</a></li>
+
     return new_body
     
 @bp.route('/source/<hive_post>')
