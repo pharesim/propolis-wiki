@@ -96,11 +96,35 @@ def wiki(hive_post):
         if post['json_metadata']['appdata']['user']:
             last_update.append(post['json_metadata']['appdata']['user'])
 
-        return render_template('wiki.html',post=post,last_update=last_update)
+        body = Markup(parseBody(post.body));
+        return render_template('wiki.html',post=post,body=body,last_update=last_update)
     
     except:
         post = {'title': hive_post[:1].upper()+hive_post[1:], 'body': 'Article not found. [Create](/create/'+hive_post+') it now!'}
         return render_template('wiki.html',post=post)
+    
+def parseBody(oldBody):
+    references = []
+    oldBody = oldBody.replace("<ref name=multiple>","<ref>")
+    refsplit = oldBody.split("<ref>")
+    new_body = refsplit[0]
+    for i, val in enumerate(refsplit):
+        if(i > 0):
+            refrest = val.split("</ref>")
+            if refrest[0] not in references:
+                references.append(refrest[0])
+                num = len(references)
+            else:
+                num = references.index(refrest[0])+1
+            new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'">['+str(num)+"]</a></sup>"
+            new_body += refrest[1]
+
+    if len(references) > 0:
+        new_body += "\n\n## References\n"
+        for i, val in enumerate(references):
+            new_body += str(i+1)+'. <a class="toref" href="#cite_ref'+str(i+1)+'">↑</a> <span id="reference_'+str(i+1)+'">'+val+"</span>\n"
+
+    return new_body
     
 @bp.route('/source/<hive_post>')
 def source(hive_post):
@@ -111,7 +135,7 @@ def source(hive_post):
     hive_post = hive_post[:1].lower()+hive_post[1:]
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
-        return render_template('source.html',post=post,body=newbody,article_title=hive_post[:1].upper()+hive_post[1:])
+        return render_template('source.html',post=post,body=post.body,article_title=hive_post[:1].upper()+hive_post[1:])
     
     except:
         return redirect('/create/'+hive_post)

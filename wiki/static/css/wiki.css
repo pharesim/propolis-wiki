@@ -642,6 +642,9 @@ div.warning {
 	margin: 0px!important;
 }
 
+a.toref {
+	text-decoration: none!important;
+}
 
 a[href^='http'] {
 	padding-right: 1.25em;
