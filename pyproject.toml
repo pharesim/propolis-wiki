@@ -5,7 +5,8 @@ description = "A wiki built on HIVE"
 dependencies = [
     "flask",
     "flask_session",
-    "beem"
+    "beem",
+    "redis"
 ]
 
 [build-system]
