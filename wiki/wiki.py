@@ -104,18 +104,19 @@ def wiki(hive_post):
         return render_template('wiki.html',post=post)
     
 def parseBody(oldBody):
-    references = []
+    references = {}
     oldBody = oldBody.replace("<ref name=multiple>","<ref>")
     refsplit = oldBody.split("<ref>")
     new_body = refsplit[0]
     for i, val in enumerate(refsplit):
         if(i > 0):
             refrest = val.split("</ref>")
-            if refrest[0] not in references:
-                references.append(refrest[0])
+            if refrest[0] not in references.keys():
+                references[refrest[0]] = 1)
                 num = len(references)
             else:
-                num = references.index(refrest[0])+1
+                references[refrest[0]] = references[refrest[0]]+1
+                num = list(references).index(refrest[0])+1
             new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'">['+str(num)+"]</a></sup>"
             new_body += refrest[1]
 

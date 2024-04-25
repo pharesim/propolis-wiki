@@ -85,9 +85,7 @@ function patchBody(permlink,newBody,t) {
     client.database.call('get_content', [wiki_user, permlink]).then(result => {
         var dmp = new diff_match_patch();
         var diff = dmp.diff_main(result.body, newBody);
-        // Result: [(-1, "Hell"), (1, "G"), (0, "o"), (1, "odbye"), (0, " World.")]
         dmp.diff_cleanupSemantic(diff);
-        // Result: [(-1, "Hello"), (1, "Goodbye"), (0, " World.")]
         patch = dmp.patch_make(result.body, diff);
         patch_body = dmp.patch_toText(patch);
         if (patch_body.length < result.body.length) { 
@@ -95,15 +93,8 @@ function patchBody(permlink,newBody,t) {
         } else {
             new_body = newBody;
         }
-        console.log(result.body);
-        console.log(newBody);
-        console.log(patch_body);
-        
-        if(confirm(new_body)) {
-            broadcastEdit(title, new_body, permlink, t);
-        }
+        broadcastEdit(title, new_body, permlink, t);
     });
-    
 }
 
 function broadcastEdit(title,body,permlink,t) {
@@ -119,7 +110,7 @@ function broadcastEdit(title,body,permlink,t) {
                 parent_author: '',
                 parent_permlink: 'wiki',
                 permlink: permlink,
-                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown\",\"app\": \"test239119/0.1\",\"appdata\": {\"user\": \""+username+"\"}}"
+                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown\",\"app\": \"test239119/0.1.1\",\"appdata\": {\"user\": \""+username+"\"}}"
             }
         ]],
         'Posting',
