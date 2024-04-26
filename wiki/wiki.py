@@ -269,7 +269,7 @@ def admin_users():
 
 @bp.route('/admin/user/add/<username>/<int:userlevel>')
 def admin_user_add(username, userlevel):
-    if(session['userlevel'] < 2 or session['userlevel'] < userlevel):
+    if(session['userlevel'] < 3 and session['userlevel'] <= userlevel):
         flash('You lack the required privileges')
         return redirect('/admin/users')
     
@@ -299,7 +299,7 @@ def admin_user_add(username, userlevel):
 
 @bp.route('/admin/user/change/<username>/<int:userlevel>')
 def admin_user_change(username, userlevel):
-    if(session['userlevel'] < 2 or session['userlevel'] < userlevel):
+    if(session['userlevel'] < 3 and session['userlevel'] <= userlevel):
         flash('You lack the required privileges')
         return redirect('/admin/users')
     
@@ -333,6 +333,10 @@ def admin_user_delete(username):
 
     for i, auth in enumerate(wiki_user["posting"]["account_auths"]):
         if(auth[0] == username):
+            if(session['userlevel'] < 3 and session['userlevel'] <= auth[1]):
+                flash('Your userlevel is too low to do this.')
+                return redirect('/admin/users')
+
             wiki_user["posting"]["account_auths"].pop(i)
             try:
                 hive_account_update(

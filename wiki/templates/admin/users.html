@@ -12,11 +12,10 @@
     <input id="new_user_username" placeholder="username" />
     <select id="new_user_userlevel">
         <option value="1">1</option>
-        {% if session.userlevel > 1 %}
-        <option value="2">2</option>
         {% if session.userlevel > 2 %}
+        <option value="2">2</option>
         <option value="3">3</option>
-        {% endif %}{% endif %}
+        {% endif %}
     </select>
     <button type="submit" id="add_user_submit">Add</button>
     <button id="add_user_submit_loading" style="display: none;" disabled>
@@ -42,8 +41,8 @@
                     <div id="user_{{ auth[0] }}_auth_edit" style="display: none">
                         <select id="user_{{ auth[0] }}_userlevel">
                             <option value="1"{% if auth[1] == 1 %} selected {% endif %}>1</option>
-                            <option value="2"{% if auth[1] == 2 %} selected {% endif %}>2</option>
                             {% if session.userlevel > 2 %}
+                            <option value="2"{% if auth[1] == 2 %} selected {% endif %}>2</option>
                             <option value="3"{% if auth[1] == 3 %} selected {% endif %}>3</option>
                             {% endif %}
                         </select>
@@ -52,7 +51,7 @@
                         <img src="{{ url_for('wiki.hive_keychain_auth.static', filename='img/counterrotation.gif') }}" style="height: 1em; " />
                     </button>
                 </td>
-                {% if session.userlevel >= auth[1] %}
+                {% if session.userlevel > auth[1] or session.userlevel > 2 %}
                 <script>
                     document.getElementById('user_{{ auth[0] }}_auth_show').addEventListener('click', function() {
                         document.getElementById('user_{{ auth[0] }}_auth_show').style.display = 'none';
@@ -66,7 +65,7 @@
                 </script>
                 {% endif %}
                 <td>
-                    {% if session.userlevel > auth[1] or session.userlevel == 3 %}
+                    {% if session.userlevel > auth[1] or session.userlevel > 2 %}
                     <button id="delete_user_{{ auth[0] }}"><i class="fas fa-trash"></i></button>
                     <button id="delete_user_{{ auth[0] }}_loading" style="display: none;" disabled>
                         <img src="{{ url_for('wiki.hive_keychain_auth.static', filename='img/counterrotation.gif') }}" style="height: 1em; " />
