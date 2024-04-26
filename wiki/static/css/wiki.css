@@ -139,13 +139,6 @@ textarea {
 optgroup {
 	font-weight: bold;
 }
-table {
-	border-collapse: collapse;
-	border-spacing: 0;
-}
-td,th {
-	padding: 0;
-}
 html {
 	color: #222;
 	font-size: 1em;
@@ -648,6 +641,28 @@ div.warning {
 
 div.toastui-editor-toolbar-item-wrapper {
 	margin: 0px;
+}
+
+table {
+	border: 1px solid rgba(0,0,0,.1);
+    border-collapse: collapse;
+    box-sizing: border-box;
+    color: #222;
+    margin: 12px 0 14px;
+    width: auto;
+	border-spacing: 0;
+}
+td,th {
+	padding: 0;
+	border: 1px solid rgba(0,0,0,.1);
+  	height: 32px;
+  	padding: 5px 14px 5px 12px;
+}
+table th {
+	background-color: #555;
+	color: #fff;
+	font-weight: 300;
+	padding-top: 6px;
 }
 
 a.toref {

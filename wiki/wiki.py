@@ -244,6 +244,45 @@ def source(hive_post):
     
     except:
         return redirect('/create/'+hive_post)
+    
+@bp.route('/admin')
+def admin():
+    return redirect('/')
+
+@bp.route('/admin/articles')
+def admin_articles():
+    return redirect('/')
+
+@bp.route('/admin/users')
+def admin_users():
+    if(session['userlevel'] < 2):
+        return redirect('/')
+    
+    account = Account(current_app.config['WIKI_USER'])
+    return render_template('admin/users.html',notabs=True,auths=account["posting"]["account_auths"])
+
+@bp.route('/admin/user/add/<username>/<int:userlevel>')
+def admin_user_add(username, userlevel):
+    if(session['userlevel'] < 2 or session['userlevel'] < userlevel):
+        return redirect('/')
+    
+    wiki_user = Account(current_app.config['WIKI_USER'])
+
+    for auth in wiki_user["posting"]["account_auths"]:
+        if(auth[0] == username):
+            log = 'User exists'
+            return redirect('/')
+        
+    new_auth = [[username,userlevel]]
+    wiki_user["posting"]["account_auths"].extend(new_auth)
+    hive_account_update(
+        {"account": current_app.config['WIKI_USER'],
+        "posting": wiki_user["posting"],
+        "memo_key": wiki_user["memo_key"],
+        "json_metadata": wiki_user["json_metadata"]}
+    )
+
+    return redirect('/admin/users')
 
 @bp.route('/setup')
 def setup():

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="article">
+    <h1>User management</h1>
+
+    <h2>Add user</h2>
+    <input id="new_user_username" placeholder="username" />
+    <select id="new_user_userlevel">
+        <option value="1">1</option>
+        {% if session.userlevel > 1 %}
+        <option value="2">2</option>
+        {% if session.userlevel > 2 %}
+        <option value="3">3</option>
+        {% endif %}{% endif %}
+    </select>
+    <button type="submit" id="add_user_submit">Add</button>
+    <button id="add_user_submit_loading" style="display: none;" disabled>
+        <img src="{{ url_for('wiki.hive_keychain_auth.static', filename='img/counterrotation.gif') }}" style="height: 1em; " />
+    </button>
+
+    <h2>Registered users</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Level</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for auth in auths %}
+            <tr>
+                <td><a href="https://hive.blog/@{{ auth[0] }}">{{ auth[0] }}</a></td>
+                <td>{{ auth[1] }}</td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script src="{{ url_for('static', filename='js/admin/users.js') }}"></script>
+{% endblock %}

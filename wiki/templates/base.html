@@ -38,12 +38,14 @@
 						<li><a href="#">About</a></li>
 						<li><a href="#">Portal</a></li>
 					</ul>
-					<h3>Interaction</h3>
+					{% if session.username is defined and session.userlevel > 1 %}
+					<h3>Administration</h3>
 					<ul>
-						<li><a href="#">Help</a></li>
-						<li><a href="#">About</a></li>
-						<li><a href="#">Portal</a></li>
+						<li><a href="/admin">Dashboard</a></li>
+						<li><a href="/admin/articles">Articles</a></li>
+						<li><a href="/admin/users">Users</a></li>
 					</ul>
+					{% endif %}
 				</div>
 			</div>
             <div class="mainsection">
