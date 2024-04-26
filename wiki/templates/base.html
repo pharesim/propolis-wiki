@@ -91,9 +91,8 @@
 					<div class="tabsRight">
 						<ul>
 							<li><a href="/wiki/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'wiki' %}active{% endif %}">Read</a></li>
-							{% if session.username is not defined %}
 							<li><a href="/source/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'source' %}active{% endif %}">View source</a></li>						
-							{% else %}
+							{% if session.username is defined %}
 							<li><a href="/edit/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'edit' %}active{% endif %}">Edit</a></li>
 							{% endif %}
 							<li><a href="/history/{{ request.path.split('/')[2] }}">View history</a></li>						

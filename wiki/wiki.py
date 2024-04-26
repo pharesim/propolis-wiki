@@ -150,15 +150,32 @@ def parseBody(oldBody):
         for val in related:
             new_body += val+"\n"
 
-    headers = new_body.split("##")
+    headers = new_body.split("\n## ")
     if(len(headers) > 1):
-        contents = '<div class="contentsPanel"><div class="contentsHeader">Contents</div>'
+        new_body = ''
+        contents = '<br><div class="contentsPanel"><div class="contentsHeader">Contents</div><ul>'
         for i, val in enumerate(headers):
             if(i > 0):
-                contents += str(i)+'. <a href="#">'+val.split("\n")[0]+'</a><br>'
+                contents += '<li><span>'+str(i)+'</span> <a href="#">'+val.split("\n")[0]+'</a>'
+                h3s = val.split("\n### ")
+                if(len(h3s) > 1):
+                    contents += '<ul>'
+                    for j, h in enumerate(h3s):
+                        new_body += h
+                        if(j < len(h3s)-1):
+                            new_body += "\n### "
+                        if(j > 0):
+                            contents += '<li><span>'+str(i)+'.'+str(j)+'</span> <a href="#">'+h.split("\n")[0]+'</a></li>'
+                    contents += '</ul>'
+                else:
+                    new_body += val
+                if(i < len(headers)-1):
+                    new_body += "\n## "
+                contents += '</li>'
+                
 
-        contents += '</div>'
-        new_body = contents+new_body
+        contents += '</ul></div>'
+        new_body = headers[0]+contents+"\n\n"+'## '+new_body
         
         #    <ul>
         #        <li><span>1.1</span><a href="#">Camel's hair pencil</a> </li>

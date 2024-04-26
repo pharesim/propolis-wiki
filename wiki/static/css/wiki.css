@@ -471,7 +471,7 @@ span.user {
 	font-size: 95%;
 	position: relative;
 	line-height: 1.7em;
-	width: 280px;
+	width: fit-content;
 }
 .contentsHeader {
 	font-family: sans-serif;
@@ -491,11 +491,15 @@ span.user {
 	display: inline-block;
 	margin-right: 8px;
 }
-.contentsPanel ul {
-	padding: 0 0 5px 5px;
+.contentsPanel ul {#
+	margin-left: 0!important;
+	padding: 0 0 5px 5px!important;
+}
+.contentsPanel ul > li:before {
+	width: 0px!important;
 }
 .contentsPanel ul li ul li {
-	padding: 0 0 0 25px;
+	padding: 0 0 0 25px!important;
 }
 .showPanel {
 	display: none;
