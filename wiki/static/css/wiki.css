@@ -646,6 +646,10 @@ div.warning {
 	margin: 0px!important;
 }
 
+div.toastui-editor-toolbar-item-wrapper {
+	margin: 0px;
+}
+
 a.toref {
 	text-decoration: none!important;
 }

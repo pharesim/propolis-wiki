@@ -16,7 +16,7 @@ const editor = new Editor({
     initialEditType: 'markdown', // wysiwyg
     plugins: [latexPlugin, colorSyntax, tableMergedCell, uml],
     extendedAutolinks: true,
-    hideModeSwitch: false,
+    hideModeSwitch: true,
 });
 
 var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
@@ -110,7 +110,7 @@ function broadcastEdit(title,body,permlink,t) {
                 parent_author: '',
                 parent_permlink: 'wiki',
                 permlink: permlink,
-                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown\",\"app\": \"test239119/0.1.1\",\"appdata\": {\"user\": \""+username+"\"}}"
+                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown\",\"app\": \""+app_name+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\"}}"
             }
         ]],
         'Posting',
