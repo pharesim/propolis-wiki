@@ -100,9 +100,7 @@
 					</div>
 					{% endif %}
 				</div>
-				<div class="article">
-                    {% block content %}{% endblock %}	
-				</div>
+				{% block content %}{% endblock %}
 				<div class="pagefooter">
 					{% block last_update %}
 					{% if last_update is defined %}
