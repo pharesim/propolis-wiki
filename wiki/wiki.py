@@ -8,8 +8,23 @@ from beem.account import Account
 from beem.comment import Comment
 
 from markupsafe import Markup
+import bleach
 
 bp = Blueprint('wiki', __name__)
+
+def xssEscape(string):
+    string = bleach.clean(
+        string,
+        tags = {'p','table','thead','th','tbody','td','tr','sup','a','br','div','span','ul','li'},
+        attributes = { 
+            'p': ['class'],
+            'th': ['colspan'],
+            'td': ['colspan'],
+            'a': ['href', 'id'],
+            'div': ['class']
+        }
+    )
+    return string
 
 def hive_broadcast(op):
     from beem.transactionbuilder import TransactionBuilder
@@ -71,7 +86,7 @@ def edit(article_title):
     if 'username' in session.keys():
         try:
             post = Comment(current_app.config['WIKI_USER']+"/"+article_title[:1].lower()+article_title[1:])
-            body = Markup(post.body);
+            body = Markup(xssEscape(post.body));
             return render_template('edit.html',post=post,body=body,article_title=article_title)
     
         except:
@@ -79,13 +94,42 @@ def edit(article_title):
     else:
         return redirect('/login/edit/'+article_title)
 
+keeplow = ['Disambiguation','disambiguation']
+def formatPostLink(hive_post):
+    split = hive_post.split("-")
+    if(len(split) > 1):
+        hive_post = ''
+        for i, val in enumerate(split):
+            if(val[:1].islower()):
+                if(val not in keeplow):
+                    hive_post += val[:1].upper()+val[1:]
+                else:
+                    hive_post += val
+            else:
+                if(val in keeplow):
+                    hive_post += val[:1].lower()+val[1:]
+                else:
+                    hive_post += val
+            if(i+1 < len(split)):
+                hive_post += '-'
+    return hive_post
+
+def unformatPostLink(hive_post):
+    split = hive_post.split("-")
+    hive_post = ''
+    for i, val in enumerate(split):
+        hive_post += val[:1].lower()+val[1:]
+        if(i+1 < len(split)):
+            hive_post += '-'
+    return hive_post
+
 @bp.route('/wiki/<hive_post>')
 def wiki(hive_post):
-    if(hive_post[:1].islower()):
-        hive_post = hive_post[:1].upper()+hive_post[1:]
-        return redirect('/wiki/'+hive_post)
+    hive_post_f = formatPostLink(hive_post)
+    if(hive_post_f != hive_post):
+        return redirect('/wiki/'+hive_post_f)
     
-    hive_post = hive_post[:1].lower()+hive_post[1:]
+    hive_post = unformatPostLink(hive_post)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
         if 'last_update' in post:
@@ -96,12 +140,13 @@ def wiki(hive_post):
         if post['json_metadata']['appdata']['user']:
             last_update.append(post['json_metadata']['appdata']['user'])
 
-        body = Markup(wikifyBody(post.body));
+        #body = Markup(wikifyBody(post.body));
+        body = Markup(xssEscape(wikifyBody(post.body)));
         return render_template('wiki.html',post=post,body=body,last_update=last_update)
     
     except:
         post = {'title': hive_post[:1].upper()+hive_post[1:], 'body': 'Article not found. [Create](/create/'+hive_post+') it now!'}
-        return render_template('wiki.html',post=post)
+        return render_template('wiki.html',post=post,body=post['body'])
     
 def wikifyBody(oldBody):
     references = {}

@@ -6,7 +6,8 @@ dependencies = [
     "flask",
     "flask_session",
     "beem",
-    "redis"
+    "redis",
+    "bleach"
 ]
 
 [build-system]
