@@ -96,16 +96,15 @@ def wiki(hive_post):
         if post['json_metadata']['appdata']['user']:
             last_update.append(post['json_metadata']['appdata']['user'])
 
-        body = Markup(parseBody(post.body));
+        body = Markup(wikifyBody(post.body));
         return render_template('wiki.html',post=post,body=body,last_update=last_update)
     
     except:
         post = {'title': hive_post[:1].upper()+hive_post[1:], 'body': 'Article not found. [Create](/create/'+hive_post+') it now!'}
         return render_template('wiki.html',post=post)
     
-def parseBody(oldBody):
+def wikifyBody(oldBody):
     references = {}
-    oldBody = oldBody.replace("<ref name=multiple>","<ref>")
     refsplit = oldBody.split("<ref>")
     new_body = refsplit[0]
     for i, val in enumerate(refsplit):
@@ -156,43 +155,37 @@ def parseBody(oldBody):
         contents = '<br><div class="contentsPanel"><div class="contentsHeader">Contents</div><ul>'
         for i, val in enumerate(headers):
             if(i > 0):
-                contents += '<li><span>'+str(i)+'</span> <a href="#">'+val.split("\n")[0]+'</a>'
+                heading = val.split("\n")[0]
+                contents += '<li><span>'+str(i)+'</span> <a href="#'+toHtmlId(heading)+'">'+heading+'</a>'
                 h3s = val.split("\n### ")
                 if(len(h3s) > 1):
                     contents += '<ul>'
                     for j, h in enumerate(h3s):
-                        new_body += h
+                        if j == 0:
+                            new_body = h
+                        else:
+                            z = h.split("\n",1)
+                            new_body += '<span id="'+toHtmlId(z[0])+'">'+z[0]+"</span>\n"+z[1]
                         if(j < len(h3s)-1):
                             new_body += "\n### "
                         if(j > 0):
-                            contents += '<li><span>'+str(i)+'.'+str(j)+'</span> <a href="#">'+h.split("\n")[0]+'</a></li>'
+                            heading = h.split("\n")[0]
+                            contents += '<li><span>'+str(i)+'.'+str(j)+'</span> <a href="#'+toHtmlId(heading)+'">'+heading+'</a></li>'
                     contents += '</ul>'
                 else:
-                    new_body += val
+                    z = val.split("\n",1)
+                    new_body += '<span id="'+toHtmlId(z[0])+'">'+z[0]+"</span>\n"+z[1]
                 if(i < len(headers)-1):
                     new_body += "\n## "
                 contents += '</li>'
-                
-
         contents += '</ul></div>'
-        new_body = headers[0]+contents+"\n\n"+'## '+new_body
-        
-        #    <ul>
-        #        <li><span>1.1</span><a href="#">Camel's hair pencil</a> </li>
-        #        <li><span>1.2</span><a href="#">Discovery of graphite deposit</a> </li>
-        #        <li><span>1.3</span><a href="#">Wood holders added </a></li>
-        #        <li><span>1.4</span><a href="#">The pencil in America </a></li>
-        #        <li><span>1.5</span><a href="#">Eraser attached </a></li>							
-        #        <li><span>1.6</span><a href="#">Marking material </a></li>							
-        #        <li><span>1.7</span><a href="#">Pencil extenders </a></li>							
-        #    </ul>
-        #</li>
-        #<li><span>2</span><a href="#">Health</a></li>
-        #<li><span>3</span><a href="#">Manufacture</a></li>
-        #<li><span>4</span><a href="#">Grading and classification</a></li>
-
+        z = new_body.split("\n",1)
+        new_body = headers[0]+contents+"\n\n"+'## '+'<span id="'+toHtmlId(z[0])+'">'+z[0]+"</span>\n"+z[1]
     return new_body
     
+def toHtmlId(string):
+    return string.replace(' ','').replace(',','').replace(':','').replace('.','')
+
 @bp.route('/source/<hive_post>')
 def source(hive_post):
     if(hive_post[:1].islower()):
