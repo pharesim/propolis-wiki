@@ -10,5 +10,7 @@ add_user_submit_btn.addEventListener('click', function() {
 function deleteUser(username) {
     document.getElementById('delete_user_'+username).style.display = 'none';
     document.getElementById('delete_user_'+username+'_loading').style.display = 'block';
-    alert('Delete '+username);
+    if(confirm('Do you want to delete the user?')) {
+        window.location.replace("/admin/user/delete/"+username);
+    }
 }

@@ -323,6 +323,32 @@ def admin_user_change(username, userlevel):
 
     return redirect('/admin/users')
 
+@bp.route('/admin/user/delete/<username>')
+def admin_user_delete(username):
+    if(session['userlevel'] < 2):
+        flash('You lack the required privileges')
+        return redirect('/admin/users')
+    
+    wiki_user = Account(current_app.config['WIKI_USER'])
+
+    for i, auth in enumerate(wiki_user["posting"]["account_auths"]):
+        if(auth[0] == username):
+            wiki_user["posting"]["account_auths"].pop(i)
+            try:
+                hive_account_update(
+                    {"account": current_app.config['WIKI_USER'],
+                    "posting": wiki_user["posting"],
+                    "memo_key": wiki_user["memo_key"],
+                    "json_metadata": wiki_user["json_metadata"]}
+                )
+                import time
+                time.sleep(5)
+                flash('User successfully deleted')
+            except:
+                flash('Deleting user failed')
+
+    return redirect('/admin/users')
+
 @bp.route('/setup')
 def setup():
     log = '';
