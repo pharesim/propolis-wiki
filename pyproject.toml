@@ -1,5 +1,5 @@
 [project]
-name = "propolis-wiki"
+name = "wiki"
 version = "0.1.1"
 description = "A wiki built on HIVE"
 dependencies = [
