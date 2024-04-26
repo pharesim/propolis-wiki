@@ -6,4 +6,9 @@ add_user_submit_btn.addEventListener('click', function() {
         window.location.replace("/admin/user/add/"+document.getElementById('new_user_username').value+"/"+document.getElementById('new_user_userlevel').value);
     }
 });
-    
+
+function deleteUser(username) {
+    document.getElementById('delete_user_'+username).style.display = 'none';
+    document.getElementById('delete_user_'+username+'_loading').style.display = 'block';
+    alert('Delete '+username);
+}

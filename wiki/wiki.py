@@ -78,8 +78,14 @@ def create(article_title = ''):
     else:
         return redirect('/login/create')    
     
+@bp.route('/insufficient_permissions')
+def insufficient_permissions():
+    return render_template('insufficient_permissions.html',notabs=True)
+
 @bp.route('/edit/<article_title>')
 def edit(article_title):
+    if(session['userlevel'] < 1):
+        return redirect('/insufficient_permissions')
     if(article_title[:1].islower()):
         return redirect('/edit/'+article_title[:1].upper()+article_title[1:])
     
@@ -264,23 +270,56 @@ def admin_users():
 @bp.route('/admin/user/add/<username>/<int:userlevel>')
 def admin_user_add(username, userlevel):
     if(session['userlevel'] < 2 or session['userlevel'] < userlevel):
-        return redirect('/')
+        flash('You lack the required privileges')
+        return redirect('/admin/users')
     
     wiki_user = Account(current_app.config['WIKI_USER'])
 
     for auth in wiki_user["posting"]["account_auths"]:
         if(auth[0] == username):
-            log = 'User exists'
-            return redirect('/')
+            flash('User already registered')
+            return redirect('/admin/users')
         
     new_auth = [[username,userlevel]]
     wiki_user["posting"]["account_auths"].extend(new_auth)
-    hive_account_update(
-        {"account": current_app.config['WIKI_USER'],
-        "posting": wiki_user["posting"],
-        "memo_key": wiki_user["memo_key"],
-        "json_metadata": wiki_user["json_metadata"]}
-    )
+    try:
+        hive_account_update(
+            {"account": current_app.config['WIKI_USER'],
+            "posting": wiki_user["posting"],
+            "memo_key": wiki_user["memo_key"],
+            "json_metadata": wiki_user["json_metadata"]}
+        )
+        import time
+        time.sleep(5)
+        flash('User successfully created')
+    except:
+        flash('User creation failed')
+
+    return redirect('/admin/users')
+
+@bp.route('/admin/user/change/<username>/<int:userlevel>')
+def admin_user_change(username, userlevel):
+    if(session['userlevel'] < 2 or session['userlevel'] < userlevel):
+        flash('You lack the required privileges')
+        return redirect('/admin/users')
+    
+    wiki_user = Account(current_app.config['WIKI_USER'])
+
+    for i, auth in enumerate(wiki_user["posting"]["account_auths"]):
+        if(auth[0] == username):
+            wiki_user["posting"]["account_auths"][i][1] = userlevel
+            try:
+                hive_account_update(
+                    {"account": current_app.config['WIKI_USER'],
+                    "posting": wiki_user["posting"],
+                    "memo_key": wiki_user["memo_key"],
+                    "json_metadata": wiki_user["json_metadata"]}
+                )
+                import time
+                time.sleep(5)
+                flash('Userlevel successfully altered')
+            except:
+                flash('Updating userlevel failed')
 
     return redirect('/admin/users')
 
