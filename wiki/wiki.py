@@ -138,10 +138,7 @@ def wiki(hive_post):
     hive_post = unformatPostLink(hive_post)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
-        if 'last_update' in post:
-            last_update = [post['last_update']]
-        else:
-            last_update = [post['created']]
+        last_update = [post['updated']]
 
         if post['json_metadata']['appdata']['user']:
             last_update.append(post['json_metadata']['appdata']['user'])
