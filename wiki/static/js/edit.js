@@ -151,9 +151,8 @@ btn.addEventListener('click', function() {
     t = t.replace(/,+$/,'');
     t += "]";
     
-    let body = editor.getMarkdown();
+    let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/');
     if(where == 'edit') {
-        body = editor.getMarkdown();
         body = patchBody(permlink, body, t);
     } else { 
         broadcastEdit(title, body, permlink, t);

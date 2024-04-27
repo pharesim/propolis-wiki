@@ -15,7 +15,7 @@ bp = Blueprint('wiki', __name__)
 def xssEscape(string):
     string = bleach.clean(
         string,
-        tags = {'p','table','thead','th','tbody','td','tr','sup','a','br','div','span','ul','li'},
+        tags = {'p','table','thead','th','tbody','td','tr','sup','a','br','div','span','ul','li','ref'},
         attributes = { 
             'p': ['class'],
             'th': ['colspan'],
@@ -100,25 +100,27 @@ def edit(article_title):
     else:
         return redirect('/login/edit/'+article_title)
 
-keeplow = ['Disambiguation','disambiguation']
 def formatPostLink(hive_post):
     split = hive_post.split("-")
     if(len(split) > 1):
         hive_post = ''
         for i, val in enumerate(split):
-            if(val[:1].islower()):
-                if(val not in keeplow):
-                    hive_post += val[:1].upper()+val[1:]
-                else:
-                    hive_post += val
-            else:
-                if(val in keeplow):
-                    hive_post += val[:1].lower()+val[1:]
-                else:
-                    hive_post += val
+            hive_post += formatPostLinkSegment(val)
             if(i+1 < len(split)):
                 hive_post += '-'
+    else:
+        hive_post = formatPostLinkSegment(hive_post)
     return hive_post
+
+def formatPostLinkSegment(val):
+    keeplow = ['Disambiguation','disambiguation']
+    if(val[:1].islower()):
+        if(val not in keeplow):
+            return val[:1].upper()+val[1:]
+    else:
+        if(val in keeplow):
+            return val[:1].lower()+val[1:]
+    return val
 
 def unformatPostLink(hive_post):
     split = hive_post.split("-")
@@ -151,9 +153,17 @@ def wiki(hive_post):
         post = {'title': hive_post[:1].upper()+hive_post[1:], 'body': 'Article not found. [Create](/create/'+hive_post+') it now!'}
         return render_template('wiki.html',post=post,body=post['body'])
     
+@bp.route('/@<username>/<hive_post>')
+def reroute(username, hive_post):
+    if(username == current_app.config['WIKI_USER']):
+        return redirect('/wiki/'+hive_post)
+    else:
+        return redirect('/')
+    
 def wikifyBody(oldBody):
+    new_body = oldBody.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/')
     references = {}
-    refsplit = oldBody.split("<ref>")
+    refsplit = new_body.split("<ref>")
     new_body = refsplit[0]
     for i, val in enumerate(refsplit):
         if(i > 0):
