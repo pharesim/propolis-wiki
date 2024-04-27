@@ -84,15 +84,15 @@ def insufficient_permissions():
 
 @bp.route('/edit/<article_title>')
 def edit(article_title):
-    if(session['userlevel'] < 1):
+    if('username' in session.keys() and session['userlevel'] < 1):
         return redirect('/insufficient_permissions')
     if(article_title[:1].islower()):
         return redirect('/edit/'+article_title[:1].upper()+article_title[1:])
     
     if 'username' in session.keys():
         try:
-            post = Comment(current_app.config['WIKI_USER']+"/"+article_title[:1].lower()+article_title[1:])
-            body = Markup(xssEscape(post.body));
+            post = Comment(current_app.config['WIKI_USER']+"/"+unformatPostLink(article_title))
+            body = Markup(xssEscape(wikifyInternalLinks(post.body)));
             return render_template('edit.html',post=post,body=body,article_title=article_title)
     
         except:
@@ -131,6 +131,9 @@ def unformatPostLink(hive_post):
             hive_post += '-'
     return hive_post
 
+def wikifyInternalLinks(body):
+    return body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
+
 @bp.route('/wiki/<hive_post>')
 def wiki(hive_post):
     hive_post_f = formatPostLink(hive_post)
@@ -159,9 +162,9 @@ def reroute(username, hive_post):
         return redirect('/wiki/'+hive_post)
     else:
         return redirect('/')
-    
+
 def wikifyBody(oldBody):
-    new_body = oldBody.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
+    new_body = wikifyInternalLinks(oldBody)
     references = {}
     refsplit = new_body.split("<ref>")
     new_body = refsplit[0]
@@ -253,7 +256,7 @@ def source(hive_post):
     hive_post = hive_post[:1].lower()+hive_post[1:]
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
-        return render_template('source.html',post=post,body=post.body,article_title=hive_post[:1].upper()+hive_post[1:])
+        return render_template('source.html',post=post,body=wikifyInternalLinks(post.body),article_title=hive_post[:1].upper()+hive_post[1:])
     
     except:
         return redirect('/create/'+hive_post)
