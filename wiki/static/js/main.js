@@ -1,4 +1,4 @@
-const version_number = '0.1.2';
+const version_number = '0.1.3';
 const app_name = 'test239119'; 
 
 // Avoid `console` errors in browsers that lack a console.
