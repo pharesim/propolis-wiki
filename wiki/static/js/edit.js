@@ -151,7 +151,7 @@ btn.addEventListener('click', function() {
     t = t.replace(/,+$/,'');
     t += "]";
     
-    let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/');
+    let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/');
     if(where == 'edit') {
         body = patchBody(permlink, body, t);
     } else { 

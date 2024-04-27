@@ -161,7 +161,7 @@ def reroute(username, hive_post):
         return redirect('/')
     
 def wikifyBody(oldBody):
-    new_body = oldBody.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/')
+    new_body = oldBody.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
     references = {}
     refsplit = new_body.split("<ref>")
     new_body = refsplit[0]
