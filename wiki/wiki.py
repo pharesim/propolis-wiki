@@ -20,8 +20,9 @@ def xssEscape(string):
             'p': ['class'],
             'th': ['colspan'],
             'td': ['colspan'],
-            'a': ['href', 'id'],
-            'div': ['class']
+            'a': ['href', 'id', 'class'],
+            'div': ['class'],
+            'span': ['id'],
         }
     )
     return string
