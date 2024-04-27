@@ -57,7 +57,7 @@ def before_request():
 
 @bp.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html',notabs=True)
 
 @bp.route('/wiki')
 def redirect_home():

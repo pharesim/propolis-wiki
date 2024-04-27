@@ -60,13 +60,13 @@
                         {% endif %}
                     </span> 
                     {% if session.username is not defined %}
+					<a href="/login{{ path }}">Login</a>
                     <a href="https://signup.hive.io/">Create account</a>
 					{% if request.path.split('/')[1] in ['', 'login', 'logout'] %}
 						{% set path = '' %}
 					{% else %}
 						{% set path = request.path %}
 					{% endif %}
-                    <a href="/login{{ path }}">Login</a>
                     {% else %} 
                     <a href="/create">Create</a>
                     <a href="#">Contributions</a> 
