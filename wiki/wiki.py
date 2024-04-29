@@ -332,7 +332,7 @@ def activity():
 def contributions():
     if('username' not in session):
         return redirect('/login')
-    return render_template('contributions.html',edits=db_get_all('SELECT timestamp, permlink FROM comments WHERE author=%s ORDER BY timestamp DESC;',(session['username'],)),notabs=True)
+    return render_template('contributions.html',edits=db_get_all('SELECT timestamp, trx_id FROM comments WHERE author=%s ORDER BY timestamp DESC;',(session['username'],)),notabs=True)
 
 @bp.route('/admin')
 def admin():
