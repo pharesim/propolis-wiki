@@ -370,8 +370,8 @@ def compare(article, revision_1, revision_2):
 
     
     permlink = unformatPostLink(article)
-    body_1 = getRevisionBody(permlink,revision_1)
-    body_2 = getRevisionBody(permlink,revision_2)
+    body_1 = replaceLinebreaks(getRevisionBody(permlink,revision_1))
+    body_2 = replaceLinebreaks(getRevisionBody(permlink,revision_2))
 
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
