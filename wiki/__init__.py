@@ -9,7 +9,7 @@ from . import wiki
 
 from .hive_keychain_auth.auth import hive_keychain_auth
 
-def create_app(test_config=None):
+def create_app():
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
@@ -18,14 +18,10 @@ def create_app(test_config=None):
         ACTIVE_KEY='5JqE...',
         SESSION_TYPE='redis',
         SESSION_REDIS='redis://127.0.0.1:6379',
-        SESSION_USE_SIGNER=True,
+        SESSION_USE_SIGNER=True
     )
 
-    if test_config is None:
-        app.config.from_pyfile('config.py')
-    else:
-        app.config.from_mapping(test_config)
-
+    app.config.from_pyfile('config.py')
     app.config['SESSION_REDIS'] = redis.from_url(app.config['SESSION_REDIS'])
     app.secret_key = app.config['SECRET_KEY']
 

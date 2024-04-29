@@ -3,6 +3,9 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 
+import time
+
+import psycopg2
 
 from beem.account import Account
 from beem.comment import Comment
@@ -11,6 +14,31 @@ from markupsafe import Markup
 import bleach
 
 bp = Blueprint('wiki', __name__)
+
+def get_db_connection():
+    conn = psycopg2.connect(host=current_app.config['DB_HOSTNAME'],
+                            database=current_app.config['DATABASE'],
+                            user=current_app.config['DB_USERNAME'],
+                            password=current_app.config['DB_PASSWORD'])
+    return conn
+
+def db_get_all(query,data = ()):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(query,data)
+    result = cur.fetchall()
+    cur.close()
+    conn.close()
+    return result
+
+def db_count(query,data = ()):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(query,data)
+    result = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return result
 
 def xssEscape(string):
     string = bleach.clean(
@@ -37,7 +65,10 @@ def hive_broadcast(op):
 
 def hive_account_update(account_data):
     from beembase import operations
-    op = operations.Account_update(**account_data)
+    op = operations.Account_update(**{"account": current_app.config['WIKI_USER'],
+            "posting": account_data["posting"],
+            "memo_key": account_data["memo_key"],
+            "json_metadata": account_data["json_metadata"]})
     return hive_broadcast(op)
 
 @bp.context_processor
@@ -93,7 +124,7 @@ def edit(article_title):
     if 'username' in session.keys():
         try:
             post = Comment(current_app.config['WIKI_USER']+"/"+unformatPostLink(article_title))
-            body = Markup(xssEscape(wikifyInternalLinks(post.body)));
+            body = Markup(xssEscape(restoreSource(post.body)));
             return render_template('edit.html',post=post,body=body,article_title=article_title)
     
         except:
@@ -132,6 +163,12 @@ def unformatPostLink(hive_post):
             hive_post += '-'
     return hive_post
 
+def restoreSource(body):
+    return restoreReferences(wikifyInternalLinks(body))
+
+def restoreReferences(body):
+    return body.replace('<ref>|Reference: ','<ref>')
+
 def wikifyInternalLinks(body):
     return body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
 
@@ -149,8 +186,7 @@ def wiki(hive_post):
         if post['json_metadata']['appdata']['user']:
             last_update.append(post['json_metadata']['appdata']['user'])
 
-        #body = Markup(wikifyBody(post.body));
-        body = Markup(xssEscape(wikifyBody(post.body)));
+        body = Markup(xssEscape(wikifyBody(post.body)))
         return render_template('wiki.html',post=post,body=body,last_update=last_update)
     
     except:
@@ -165,7 +201,7 @@ def reroute(username, hive_post):
         return redirect('/')
 
 def wikifyBody(oldBody):
-    new_body = wikifyInternalLinks(oldBody)
+    new_body = restoreSource(oldBody)
     references = {}
     refsplit = new_body.split("<ref>")
     new_body = refsplit[0]
@@ -257,17 +293,47 @@ def source(hive_post):
     hive_post = hive_post[:1].lower()+hive_post[1:]
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
-        return render_template('source.html',post=post,body=wikifyInternalLinks(post.body),article_title=hive_post[:1].upper()+hive_post[1:])
+        return render_template('source.html',post=post,body=restoreSource(post.body),article_title=hive_post[:1].upper()+hive_post[1:])
     
     except:
         return redirect('/create/'+hive_post)
     
+@bp.route('/wiki/Categories:Overview')
+def categories():
+    categories = db_get_all('SELECT category FROM categories ORDER BY category;')
+    for i, category in enumerate(categories):
+        categories[i] = (categories[i][0],db_count('SELECT count(category) FROM categories_posts WHERE category=%s;',(category[0],)))
+    return render_template('categories.html', categories=categories,notabs=True)
+
+@bp.route('/wiki/Category:<category>')
+def category(category):
+    posts = db_get_all('SELECT permlink FROM categories_posts WHERE category=%s;',(category.lower(),))
+    return render_template('category.html', category=category,posts=posts,notabs=True)
+
+@bp.route('/random')
+def random_article():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT permlink FROM posts;')
+    permlinks = cur.fetchall()
+    cur.close()
+    conn.close()
+    import random
+    rand = random.randint(0, len(permlinks)-1)
+    return redirect('/wiki/'+permlinks[rand][0])
+
+@bp.route('/activity')
+def activity():
+    return render_template('activity.html',edits=db_get_all('SELECT timestamp, permlink, author FROM comments ORDER BY timestamp DESC;'),notabs=True)
+
+@bp.route('/contributions')
+def contributions():
+    if('username' not in session):
+        return redirect('/login')
+    return render_template('contributions.html',edits=db_get_all('SELECT timestamp, permlink FROM comments WHERE author=%s ORDER BY timestamp DESC;',(session['username'],)),notabs=True)
+
 @bp.route('/admin')
 def admin():
-    return redirect('/')
-
-@bp.route('/admin/articles')
-def admin_articles():
     return redirect('/')
 
 @bp.route('/admin/users')
@@ -294,13 +360,7 @@ def admin_user_add(username, userlevel):
     new_auth = [[username,userlevel]]
     wiki_user["posting"]["account_auths"].extend(new_auth)
     try:
-        hive_account_update(
-            {"account": current_app.config['WIKI_USER'],
-            "posting": wiki_user["posting"],
-            "memo_key": wiki_user["memo_key"],
-            "json_metadata": wiki_user["json_metadata"]}
-        )
-        import time
+        hive_account_update(wiki_user)
         time.sleep(5)
         flash('User successfully created')
     except:
@@ -320,13 +380,7 @@ def admin_user_change(username, userlevel):
         if(auth[0] == username):
             wiki_user["posting"]["account_auths"][i][1] = userlevel
             try:
-                hive_account_update(
-                    {"account": current_app.config['WIKI_USER'],
-                    "posting": wiki_user["posting"],
-                    "memo_key": wiki_user["memo_key"],
-                    "json_metadata": wiki_user["json_metadata"]}
-                )
-                import time
+                hive_account_update(wiki_user)
                 time.sleep(5)
                 flash('Userlevel successfully altered')
             except:
@@ -350,13 +404,7 @@ def admin_user_delete(username):
 
             wiki_user["posting"]["account_auths"].pop(i)
             try:
-                hive_account_update(
-                    {"account": current_app.config['WIKI_USER'],
-                    "posting": wiki_user["posting"],
-                    "memo_key": wiki_user["memo_key"],
-                    "json_metadata": wiki_user["json_metadata"]}
-                )
-                import time
+                hive_account_update(wiki_user)
                 time.sleep(5)
                 flash('User successfully deleted')
             except:
@@ -366,17 +414,12 @@ def admin_user_delete(username):
 
 @bp.route('/setup')
 def setup():
-    log = '';
+    log = ''
     account = Account(current_app.config['WIKI_USER'])
     if(account["posting"]["account_auths"] == []):
         if(session['username']):
             account["posting"]["account_auths"] = [[session['username'],3]]
-            hive_account_update(
-                {"account": current_app.config['WIKI_USER'],
-                "posting": account["posting"],
-                "memo_key": account["memo_key"],
-                "json_metadata": account["json_metadata"]}
-            )
+            hive_account_update(account)
             log = log + 'Created admin account '+session['username']+'<br />'
         else:
             log = log + 'No admin set, but not logged in. <a href="/login/setup">Log in</a> and try again<br />'

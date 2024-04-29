@@ -110,7 +110,7 @@ function broadcastEdit(title,body,permlink,t) {
                 parent_author: '',
                 parent_permlink: 'wiki',
                 permlink: permlink,
-                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown\",\"app\": \""+app_name+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\"}}"
+                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown\",\"app\": \""+wiki_user+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\"}}"
             }
         ]],
         'Posting',
@@ -151,7 +151,7 @@ btn.addEventListener('click', function() {
     t = t.replace(/,+$/,'');
     t += "]";
     
-    let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/');
+    let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
     if(where == 'edit') {
         body = patchBody(permlink, body, t);
     } else { 

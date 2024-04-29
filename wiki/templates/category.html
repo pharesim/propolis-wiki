@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="article">
+    <h1>Category: {{ category }}</h1>
+    This is an alphabetical list of all articles in the category
+
+    <h2>List of articles</h2>
+    <ul>
+        {% for post in posts %}
+        <li><a href="/wiki/{{ post[0] | capitalize }}">{{ post[0] | capitalize }}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

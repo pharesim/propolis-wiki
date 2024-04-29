@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="article">
+    <h1>Your contributions</h1>
+
+    {% if edits|length > 0 %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Article</th>
+            </tr>
+        </thead>
+        <tbody>
+            <script>var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);</script>
+            {% for edit in edits %}
+            <script>
+                // @todo this is getting data that's already available from the database. keeping it for eventual future use. remove when not necessary.
+                client.database.call('get_content', [wiki_user, '{{ edit[1] }}']).then(result => {
+                    document.getElementById('edit_{{ edit[0] }}_title').innerHTML = '<a href="/wiki/'+result.permlink.charAt(0).toUpperCase() + result.permlink.slice(1)+'">'+result.title+'</a>';
+                });
+            </script>
+            <tr>
+                <td>{{ edit[0] }}</td>
+                <td id="edit_{{ edit[0] }}_title"><a href="/wiki/{{ edit[1] | capitalize }}">{{ edit[1] | capitalize }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table> 
+    {% else %}
+    <p>No contributions so far. Start by editing an article, or <a href="/create">creating</a> a new one!</p>
+    {% endif %}
+</div>
+{% endblock %}

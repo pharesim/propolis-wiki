@@ -6,7 +6,7 @@
 {% include 'helpers/editor.html' %}
 <div class="categories">
     {% for tag in post.json_metadata.tags %}{% if tag != 'wiki' %}
-    <a href="/category/{{ tag }}">{{ tag | capitalize }}</a>
+    <a href="/wiki/Category:{{ tag | capitalize }}">{{ tag | capitalize }}</a>
     {% endif %}{% endfor %}
 </div>
 <script src="{{ url_for('static', filename='js/wiki.js') }}"></script>

@@ -1,13 +1,14 @@
 [project]
 name = "wiki"
-version = "0.1.3"
+version = "0.2"
 description = "A wiki built on HIVE"
 dependencies = [
     "flask",
     "flask_session",
     "beem",
     "redis",
-    "bleach"
+    "bleach",
+    "psycopg2-binary"
 ]
 
 [build-system]
