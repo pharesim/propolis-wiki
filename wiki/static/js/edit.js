@@ -110,7 +110,7 @@ function broadcastEdit(title,body,permlink,t) {
                 parent_author: '',
                 parent_permlink: 'wiki',
                 permlink: permlink,
-                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown\",\"app\": \""+wiki_user+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\"}}"
+                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown+html\",\"app\": \""+wiki_user+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\"}}"
             }
         ]],
         'Posting',
