@@ -87,10 +87,6 @@ def before_request():
                 userlevel = key[1]
         session['userlevel'] = userlevel
 
-#@bp.route('/')
-#def home():
-#    return render_template('index.html',notabs=True)
-
 @bp.route('/wiki')
 def redirect_home():
     return redirect('/')
@@ -175,11 +171,13 @@ def wikifyInternalLinks(body):
     return body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
 
 
-@bp.route('/wiki/<hive_post>')
 @bp.route('/')
+@bp.route('/wiki/<hive_post>')
 def wiki(hive_post = ''):
     if(hive_post == ''):
-        hive_post = current_app.config['START_PAGE']
+        hive_post = formatPostLink(current_app.config['START_PAGE'])
+    elif(unformatPostLink(hive_post) == current_app.config['START_PAGE']):
+        return redirect('/')
     hive_post_f = formatPostLink(hive_post)
     if(hive_post_f != hive_post):
         return redirect('/wiki/'+hive_post_f)
