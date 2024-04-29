@@ -105,6 +105,11 @@
 					{% endif %}
 				</div>
 				<div class="article">
+					
+				{% with messages = get_flashed_messages()%}{% if messages%}{% for message in messages%}
+				<p class="message">{{ message }}</p>
+				{% endfor %}{% endif %}{% endwith %}
+				
 				{% block content %}{% endblock %}
 				</div>
 				<div class="pagefooter">

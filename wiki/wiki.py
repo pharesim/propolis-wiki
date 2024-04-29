@@ -87,9 +87,9 @@ def before_request():
                 userlevel = key[1]
         session['userlevel'] = userlevel
 
-@bp.route('/')
-def home():
-    return render_template('index.html',notabs=True)
+#@bp.route('/')
+#def home():
+#    return render_template('index.html',notabs=True)
 
 @bp.route('/wiki')
 def redirect_home():
@@ -174,8 +174,12 @@ def restoreReferences(body):
 def wikifyInternalLinks(body):
     return body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
 
+
 @bp.route('/wiki/<hive_post>')
-def wiki(hive_post):
+@bp.route('/')
+def wiki(hive_post = ''):
+    if(hive_post == ''):
+        hive_post = current_app.config['START_PAGE']
     hive_post_f = formatPostLink(hive_post)
     if(hive_post_f != hive_post):
         return redirect('/wiki/'+hive_post_f)
@@ -239,10 +243,10 @@ def wikifyBody(oldBody):
                 relrest = val.split(")")
                 link = relrest[0]
                 rel = '['+title+'](/wiki/'+link+')'
-                if rel not in related:
+                if ':' not in link and rel not in related:
                     related.append(rel)
             relrest = val.split("[")
-            title = relrest[-1]    
+            title = relrest[-1][:1].upper()+relrest[-1][1:]
 
     if len(related) > 0:
         new_body += "\n## Related Articles\n"
@@ -280,7 +284,9 @@ def wikifyBody(oldBody):
                 contents += '</li>'
         contents += '</ul></div>'
         z = new_body.split("\n",1)
-        new_body = headers[0]+contents+"\n\n"+'## '+'<span id="'+toHtmlId(z[0])+'">'+z[0]+"</span>\n"+z[1]
+        if(z[0][0:5] != '<span'):
+            z[0] = '<span id="'+toHtmlId(z[0])+'">'+z[0]+'</span>'
+        new_body = headers[0]+contents+"\n\n"+'## '+z[0]+"\n"+z[1]
     return new_body
     
 def toHtmlId(string):
@@ -292,9 +298,16 @@ def source(hive_post):
         hive_post = hive_post[:1].upper()+hive_post[1:]
         return redirect('/source/'+hive_post)
     
-    hive_post = hive_post[:1].lower()+hive_post[1:]
+    splits = hive_post.split('-')
+    permlink = ''
+    for i, split in enumerate(splits):
+        permlink += split[:1].lower()+split[1:]
+        if i < len(splits)-1:
+            permlink += '-'
+    post = {}
+    post["body"] = permlink
     try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
         return render_template('source.html',post=post,body=restoreSource(post.body),article_title=hive_post[:1].upper()+hive_post[1:])
     
     except:

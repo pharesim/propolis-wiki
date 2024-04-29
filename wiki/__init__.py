@@ -18,7 +18,8 @@ def create_app():
         ACTIVE_KEY='5JqE...',
         SESSION_TYPE='redis',
         SESSION_REDIS='redis://127.0.0.1:6379',
-        SESSION_USE_SIGNER=True
+        SESSION_USE_SIGNER=True,
+        START_PAGE='Welcome-to-propolis-wiki'
     )
 
     app.config.from_pyfile('config.py')
