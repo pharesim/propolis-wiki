@@ -9,6 +9,7 @@ This is a full list of edits on all articles
             <th>Time</th>
             <th>Article</th>
             <th>Editor</th>
+            <th>Reason</th>
         </tr>
     </thead>
     <tbody>
@@ -16,16 +17,21 @@ This is a full list of edits on all articles
         {% for edit in edits %}
         <script>
             // @todo this is getting data that's already available from the database. keeping it for eventual future use. remove when not necessary.
-            client.database.call('get_content', [wiki_user, '{{ edit[1] }}']).then(result => {
+            client.database.call('get_transaction', ['{{ edit[0] }}']).then(result => {
+                result = result['operations'][0][1];
                 document.getElementById('edit_{{ edit[0] }}_title').innerHTML = '<a href="/wiki/'+result.permlink.charAt(0).toUpperCase() + result.permlink.slice(1)+'">'+result.title+'</a>';
-                let user = JSON.parse(result.json_metadata)['appdata']['user'];
+                let metadata = JSON.parse(result.json_metadata);
+                let user = metadata['appdata']['user'];
                 document.getElementById('edit_{{ edit[0] }}_user').innerHTML = '<a href="https://hive.blog/@'+user+'">'+user+'</a>';
+                let reason = metadata['appdata']['reason'];
+                document.getElementById('edit_{{ edit[0] }}_reason').innerHTML = reason;
             });
         </script>
         <tr>
-            <td>{{ edit[0] }}</td>
-            <td id="edit_{{ edit[0] }}_title"><a href="/wiki/{{ edit[1] | capitalize }}">{{ edit[1] | capitalize }}</a></td>
-            <td id="edit_{{ edit[0] }}_user"><a href="https://hive.blog/@{{ edit[2] }}">{{ edit[2] }}</a></td>
+            <td>{{ edit[1] }}</td>
+            <td id="edit_{{ edit[0] }}_title"></td>
+            <td id="edit_{{ edit[0] }}_user"></td>
+            <td id="edit_{{ edit[0] }}_reason"></td>
         </tr>
         {% endfor %}
     </tbody>

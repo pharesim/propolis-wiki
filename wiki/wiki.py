@@ -326,7 +326,7 @@ def random_article():
 
 @bp.route('/activity')
 def activity():
-    return render_template('activity.html',edits=db_get_all('SELECT timestamp, permlink, author FROM comments ORDER BY timestamp DESC;'),notabs=True)
+    return render_template('activity.html',edits=db_get_all('SELECT trx_id, timestamp FROM comments ORDER BY timestamp DESC;'),notabs=True)
 
 @bp.route('/contributions')
 def contributions():
