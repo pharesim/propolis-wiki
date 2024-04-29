@@ -102,12 +102,12 @@ def article():
 @bp.route('/create')
 @bp.route('/create/<article_title>')
 def create(article_title = ''):
-    if('username' in session.keys() and session['userlevel'] < 1):
-        return redirect('/insufficient_permissions')
     if(article_title[:1].islower()):
         return redirect('/create/'+article_title[:1].upper()+article_title[1:])
     
     if 'username' in session.keys():
+        if(session['userlevel'] < 1):
+            return redirect('/insufficient_permissions')
         return render_template('edit.html',article_title=article_title,notabs=True)
     else:
         return redirect('/login/create')    
