@@ -99,15 +99,11 @@ def redirect_home():
 def article():
     return render_template('article.html')
 
-@bp.route('/insufficient_permissions')
-def insufficient_permissions():
-    return render_template('insufficient_permissions.html',notabs=True)
-
 @bp.route('/create')
 @bp.route('/create/<article_title>')
-if('username' in session.keys() and session['userlevel'] < 1):
-        return redirect('/insufficient_permissions')
 def create(article_title = ''):
+    if('username' in session.keys() and session['userlevel'] < 1):
+        return redirect('/insufficient_permissions')
     if(article_title[:1].islower()):
         return redirect('/create/'+article_title[:1].upper()+article_title[1:])
     
@@ -115,6 +111,10 @@ def create(article_title = ''):
         return render_template('edit.html',article_title=article_title,notabs=True)
     else:
         return redirect('/login/create')    
+    
+@bp.route('/insufficient_permissions')
+def insufficient_permissions():
+    return render_template('insufficient_permissions.html',notabs=True)
 
 @bp.route('/edit/<article_title>')
 def edit(article_title):
