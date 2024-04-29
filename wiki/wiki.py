@@ -175,9 +175,7 @@ def wikifyInternalLinks(body):
 @bp.route('/wiki/<hive_post>')
 def wiki(hive_post = ''):
     if(hive_post == ''):
-        hive_post = formatPostLink(current_app.config['START_PAGE'])
-    elif(unformatPostLink(hive_post) == current_app.config['START_PAGE']):
-        return redirect('/')
+        hive_post = current_app.config['START_PAGE']
     hive_post_f = formatPostLink(hive_post)
     if(hive_post_f != hive_post):
         return redirect('/wiki/'+hive_post_f)
