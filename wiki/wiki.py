@@ -127,7 +127,7 @@ def edit(article_title):
         try:
             post = Comment(current_app.config['WIKI_USER']+"/"+unformatPostLink(article_title))
             body = Markup(xssEscape(restoreSource(post.body)));
-            return render_template('edit.html',post=post,body=body,article_title=article_title)
+            return render_template('edit.html',post=post,body=body,article_title=post.title)
     
         except:
             return redirect('/create/'+article_title)
