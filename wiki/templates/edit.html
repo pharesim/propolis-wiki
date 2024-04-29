@@ -17,6 +17,11 @@
 <p>
   <input type="text" id="topics" class="topics" placeholder="Topics separated by space" {% if post is defined %}value="{{ " ".join(post.json_metadata.tags) }}" {% endif %}/>
 </p>
+{% if where == 'edit' %} 
+<p>
+  <input type="text" id="reason" class="topics" placeholder="Reason for your edit" />
+</p>
+{% endif %}
 <p>
   {% if where == 'create' %}
   <div class="warning" id="title_empty_warning">Give the article a name</div>

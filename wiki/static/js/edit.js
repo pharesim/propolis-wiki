@@ -81,7 +81,7 @@ function checkExists(permlink) {
     enableSubmit();
 }
 
-function patchBody(permlink,newBody,t) {
+function patchBody(permlink,newBody,t,reason) {
     client.database.call('get_content', [wiki_user, permlink]).then(result => {
         var dmp = new diff_match_patch();
         var diff = dmp.diff_main(result.body, newBody);
@@ -93,11 +93,11 @@ function patchBody(permlink,newBody,t) {
         } else {
             new_body = newBody;
         }
-        broadcastEdit(result.title, new_body, permlink, t);
+        broadcastEdit(result.title, new_body, permlink, t, reason);
     });
 }
 
-function broadcastEdit(title,body,permlink,t) {
+function broadcastEdit(title,body,permlink,t,reason) {
     const keychain = window.hive_keychain;
     keychain.requestBroadcast(
         wiki_user,
@@ -110,15 +110,14 @@ function broadcastEdit(title,body,permlink,t) {
                 parent_author: '',
                 parent_permlink: 'wiki',
                 permlink: permlink,
-                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown+html\",\"app\": \""+wiki_user+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\"}}"
+                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown+html\",\"app\": \""+wiki_user+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\", \"reason\": \""+reason+"\"}}"
             }
         ]],
         'Posting',
         (response) => {
-            console.log(body);
-            console.log(response);
             if(response.success == true) {
-                window.location.replace("/wiki/"+permlink);
+                alert('Edit successful, waiting for blockchain sync...');
+                setTimeout(() => { window.location.replace("/wiki/"+permlink) }, 5000);
             } else {
                 btn.style.display = 'block';
                 document.getElementById("loading").style.display = 'none';
@@ -150,12 +149,14 @@ btn.addEventListener('click', function() {
     });
     t = t.replace(/,+$/,'');
     t += "]";
-    
+
+    let reason = 'Initial post';
     let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
     if(where == 'edit') {
-        body = patchBody(permlink, body, t);
+        let reason = document.getElementById('reason').value;
+        body = patchBody(permlink, body, t, reason);
     } else { 
-        broadcastEdit(title, body, permlink, t);
+        broadcastEdit(title, body, permlink, t, reason);
     }
 });
 
