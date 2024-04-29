@@ -117,7 +117,7 @@ function broadcastEdit(title,body,permlink,t,reason) {
         (response) => {
             if(response.success == true) {
                 alert('Edit successful, waiting for blockchain sync...');
-                setTimeout(() => { window.location.replace("/wiki/"+permlink) }, 5000);
+                setTimeout(() => { window.location.replace("/wiki/"+permlink) }, 2000);
             } else {
                 btn.style.display = 'block';
                 document.getElementById("loading").style.display = 'none';
