@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Compare revisions of {{ post.title }}</h1>
+This is a comparison between revisions {{ revision_1 }} and {{ revision_2 }}
+<div class="card">
+    <div class="row">
+        <div class="col">
+            <h4>Document with changes</h4>
+            <div class="card current-document" id="output"></div>
+        </div>
+        <div class="col">
+            <h4>Original Document</h4>
+            <div class="card system-generated" id="outputNew"></div>
+        </div>
+    </div>
+</div>
+<script src="{{ url_for('static', filename='js/vendor/htmldiff.js') }}"></script>
+<script>
+originalHTML = `{{ body_1 }}`;
+newHTML = `{{ body_2 }}`;
+// Diff HTML strings
+let output = htmldiff(originalHTML, newHTML);
+let input = htmldiff(newHTML, originalHTML);
+// Show HTML diff output as HTML!
+document.getElementById("output").innerHTML = output.replace('<br>',"\n");
+document.getElementById("outputNew").innerHTML = input.replace('<br>',"\n");
+</script>
+{% endblock %}

@@ -679,3 +679,50 @@ a[href^='http']::after {
 p.message {
 	color: red;
 }
+
+.card {
+	background: #fff;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	margin: 1rem;
+	padding: 1rem;
+  }
+  
+  .card .card {
+	margin: 0;
+	flex: 1 0 0;
+  }
+  
+  .row {
+	display: flex;
+	justify-content: space-between;
+	margin-right: -8px;
+  }
+  
+  .col {
+	display: flex;
+	flex: 1 0 0;
+	flex-direction: column;
+	margin-right: 8px;
+  }
+  
+  .current-document ins {
+	background: lightgreen;
+	text-decoration: none;
+  }
+  
+  .current-document del {
+	background: pink;
+  }
+  
+  .system-generated del {
+	visibility: hidden;
+  }
+  
+  .system-generated ins {
+	text-decoration: none;
+  }
+  
+  .system-generated ins ~ del {
+	display: none;
+  }

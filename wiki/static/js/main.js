@@ -1,4 +1,4 @@
-const version_number = '0.2.6';
+const version_number = '0.3';
 
 // Avoid `console` errors in browsers that lack a console.
 (function() {
@@ -47,4 +47,34 @@ function latexPlugin() {
     }
 
     return { toHTMLRenderers }
+}
+
+function formatPostLink(permlink) {
+    split = permlink.split("-")
+    if(split.length > 1) {
+        permlink = '';
+        for (let i = 0; i < split.length; i++) {
+            permlink += formatPostLinkSegment(split[i]);
+            if(i+1 < split.length) {
+                permlink += '-';
+            }
+        }
+    } else {
+        permlink = formatPostLinkSegment(permlink);
+    }
+    return permlink;
+}
+
+function formatPostLinkSegment(val) {
+    let keeplow = ['Disambiguation','disambiguation'];
+    if(val[1] == val[0].toLowerCase()) {
+        if(!keeplow.includes(val)) {
+            return val[0].toUpperCase()+val.substring(1,-1);
+        }
+    } else {
+        if(keeplow.includes(val)) {
+            return val[0].lower()+val.substring(1,-1);
+        }
+    }
+    return val;
 }

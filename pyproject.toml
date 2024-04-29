@@ -1,6 +1,6 @@
 [project]
 name = "wiki"
-version = "0.2.6"
+version = "0.3"
 description = "A wiki built on HIVE"
 dependencies = [
     "flask",
@@ -8,7 +8,8 @@ dependencies = [
     "beem",
     "redis",
     "bleach",
-    "psycopg2-binary"
+    "psycopg2-binary",
+    "diff-match-patch"
 ]
 
 [build-system]

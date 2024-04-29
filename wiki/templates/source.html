@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<p># {{ article_title }}</p>
+<p># {{ post.title }}</p>
 <div id="source">{{ body | replace('\n', '<br>' | safe) }}</div>
 {% endblock %}b

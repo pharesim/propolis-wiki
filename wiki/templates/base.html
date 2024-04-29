@@ -99,7 +99,7 @@
 							{% if session.username is defined %}
 							<li><a href="/edit/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'edit' %}active{% endif %}">Edit</a></li>
 							{% endif %}
-							<li><a href="/history/{{ request.path.split('/')[2] }}">View history</a></li>						
+							<li><a href="/history/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'history' %}active{% endif %}">View history</a></li>						
 						</ul>
 					</div>
 					{% endif %}
@@ -109,7 +109,7 @@
 				{% with messages = get_flashed_messages()%}{% if messages%}{% for message in messages%}
 				<p class="message">{{ message }}</p>
 				{% endfor %}{% endif %}{% endwith %}
-				
+
 				{% block content %}{% endblock %}
 				</div>
 				<div class="pagefooter">
