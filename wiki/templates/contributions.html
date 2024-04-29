@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="article">
     <h1>Your contributions</h1>
 
     {% if edits|length > 0 %}
@@ -31,5 +30,4 @@
     {% else %}
     <p>No contributions so far. Start by editing an article, or <a href="/create">creating</a> a new one!</p>
     {% endif %}
-</div>
 {% endblock %}

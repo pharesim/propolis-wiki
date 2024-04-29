@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="article">
 <h1 id="title">{{ post.title }}</h1>
 {% include 'helpers/editor.html' %}
 <div class="categories">
@@ -10,5 +9,4 @@
     {% endif %}{% endfor %}
 </div>
 <script src="{{ url_for('static', filename='js/wiki.js') }}"></script>
-</div>
 {% endblock %}

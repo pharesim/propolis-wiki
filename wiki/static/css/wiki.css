@@ -255,11 +255,11 @@ h1, h2, h3, h4, h5, h6 {
 	padding-top: 0.5em!important;
 	padding-bottom: 0.17em!important;
 }
-.article h1 {
+h1 {
 	font-family: 'Linux Libertine','Georgia','Times',serif!important;
 	border-bottom: 1px solid #a2a9b1!important;
 }
-.article h2 {
+h2 {
 	font-size: 1.6em!important;
 	margin: 0.5em 0 0.5em 0!important;
 	font-family: 'Linux Libertine','Georgia','Times',serif!important;
@@ -267,11 +267,11 @@ h1, h2, h3, h4, h5, h6 {
 	line-height: 1.4em!important;
 	padding-bottom: 0em!important;
 }
-.article h3 {
+{
 	font-weight: bold!important;
 	font-size: 1.2em!important;
 }
-.article p.roleNote {
+p.roleNote {
 	padding: 1em 0 0 1.6em;
 	font-style: italic;
 }
@@ -448,7 +448,6 @@ div.articleRightInner {
 	border-bottom: 1px solid #a7d7f9!important;
 }
 .article p {
-	line-height: inherit!important;
 	margin: 0.5em 0!important;
 }
 span.user {

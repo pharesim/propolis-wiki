@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<div class="editorview">
 
 {% if request.path.split('/')[1] == 'create' %}
 {% set where = 'create' %}
@@ -37,4 +38,6 @@
   const where = "{{ where }}";
 </script>
 <script src="{{ url_for('static', filename='js/edit.js') }}"></script>
+
+</div>
 {% endblock %}
