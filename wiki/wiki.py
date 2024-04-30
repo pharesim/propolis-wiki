@@ -203,6 +203,7 @@ def wikifyBody(oldBody):
                 new_body += '<a class="toref" href="#cite_ref'+str(i+1)+'_'+str(j)+'">↑</a> ';
             new_body += '<span id="reference_'+str(i+1)+'">'+val+"</span>\n"
             i = i+1
+
     related, new_body = getRelated(new_body)
     if len(related) > 0:
         new_body += "\n## Related Articles\n"
@@ -258,7 +259,7 @@ def getRelated(new_body):
             relrest = val.split(splitters[1])
             link = relrest[0]
             if(i > 0):
-                rel = splitters[2]+title+splitters[0]+link+splitters[1]
+                rel = splitters[2]+title+splitters[0]+formatPostLink(link)+splitters[1]
                 exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(unformatPostLink(link),))
                 tuple = (rel,exists,title)      
                 if ':' not in link and tuple not in related:                         
@@ -266,8 +267,8 @@ def getRelated(new_body):
                 new_body += splitters[0]
             relbef = val.split(splitters[2])
             split = relbef[0].split(splitters[1],1)
-            link = split[0]
-            new_body += relbef[0]
+            link = formatPostLink(split[0])
+            new_body += link+splitters[1]+split[1]
             if(len(relbef) > 1):
                 for j, v in enumerate(relbef):
                     if j > 0:
