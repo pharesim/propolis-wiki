@@ -1,7 +1,36 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+{% if revision is defined: %}
+<div class="mw-message-box">
+    <div>
+        This is an old version of this article, last updated on <span id="latest_updated">{{ latest_update[0]}}</span> by
+        <a href="https://hive.blog/@{{ latest_update[1] }}">{{ latest_update[1] }}</a>.
+        It can differ considerably from the current version.
+    </div>
+    {% if older_revision != '' %}
+    (<a href="/history/{{ permlink }}/compare/{{ older_revision }}/{{ revision }}" title="{{ post.title }}">
+        Difference</a>
+    )
+    <a href="/history/{{ permlink }}/{{ older_revision }}/revision" title="{{ post.title }}">
+        ← older version
+    </a> | 
+    {% endif %}
+    <a href="/wiki/{{ permlink }}" title="{{ post.title }}">Current Version</a> 
+    (<a href="/history/{{ permlink }}/compare/{{ revision }}/{{ latest_revision }}"  title="{{ post.title }}">Difference</a>)
+    {% if latest_revision != newer_revision %}
+    | <a href="/history/{{ permlink }}/revision/{{ newer_revision }}" title="{{ post.title }}">
+        newer version →
+    </a> 
+    (<a href="/history/{{ permlink }}/compare/{{ revision }}/{{ newer_revision }}" title="{{ post.title }}">
+        Difference
+    </a>)
+    {% endif %}
+</div>
+<script>
+    document.getElementById('latest_updated').innerHTML = new Date(document.getElementById('latest_updated').innerHTML).toString();
+</script>
+{% endif %}
 <h1 id="title">{{ post.title }}</h1>
 {% include 'helpers/editor.html' %}
 <div class="categories">

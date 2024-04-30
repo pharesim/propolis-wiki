@@ -117,9 +117,6 @@
 					{% if last_update is defined %}
 					<span id="last_update">
 						This page was last edited on <span id="last_updated">{{ last_update[0] }}</span>
-						<script>
-							document.getElementById('last_updated').innerHTML = new Date(document.getElementById('last_updated').innerHTML).toString();
-						</script>
 						{% if last_update[1] %}
 						<span id="last_updater"> by <a href="#" id="last_updater_link">@<span id="last_updater_user">{{ last_update[1] }}</span></a></span>
 						{% endif %}

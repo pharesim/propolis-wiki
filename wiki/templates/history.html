@@ -7,7 +7,7 @@ This is a full list of edits on the article
     <thead>
         <tr>
             <th>Compare</th>
-            <th>ID</th>
+            <th>Revision</th>
             <th>Time</th>
             <th>Editor</th>
             <th>Reason</th>
@@ -30,7 +30,7 @@ This is a full list of edits on the article
                 {% else %}<a href="/history/{{ permlink }}/revision/{{ edit[0] }}">{% endif %}
                 {{ edit[0] }}
             </td>
-            <td>{{ edit[1] }}</td>
+            <td id="edit_{{ edit[0] }}_time">{{ edit[1] }}</td>
             <td id="edit_{{ edit[0] }}_user"></td>
             <td id="edit_{{ edit[0] }}_reason"></td>          
         </tr>

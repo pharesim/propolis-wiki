@@ -4,6 +4,7 @@ from flask import (
 from werkzeug.exceptions import abort
 
 import time
+import json
 
 import psycopg2
 
@@ -173,38 +174,6 @@ def restoreReferences(body):
 def wikifyInternalLinks(body):
     return body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
 
-
-@bp.route('/')
-@bp.route('/wiki/<hive_post>')
-def wiki(hive_post = ''):
-    if(hive_post == ''):
-        hive_post = current_app.config['START_PAGE']
-    hive_post_f = formatPostLink(hive_post)
-    if(hive_post_f != hive_post):
-        return redirect('/wiki/'+hive_post_f)
-    
-    hive_post = unformatPostLink(hive_post)
-    try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+hive_post)
-        last_update = [post['updated']]
-
-        if post['json_metadata']['appdata']['user']:
-            last_update.append(post['json_metadata']['appdata']['user'])
-
-        body = Markup(xssEscape(wikifyBody(post.body)))
-        return render_template('wiki.html',post=post,body=body,last_update=last_update)
-    
-    except:
-        post = {'title': hive_post[:1].upper()+hive_post[1:], 'body': 'Article not found. [Create](/create/'+hive_post+') it now!'}
-        return render_template('wiki.html',post=post,body=post['body'])
-    
-@bp.route('/@<username>/<hive_post>')
-def reroute(username, hive_post):
-    if(username == current_app.config['WIKI_USER']):
-        return redirect('/wiki/'+hive_post)
-    else:
-        return redirect('/')
-
 def wikifyBody(oldBody):
     new_body = restoreSource(oldBody)
     references = {}
@@ -291,6 +260,37 @@ def wikifyBody(oldBody):
 def toHtmlId(string):
     return string.replace(' ','').replace(',','').replace(':','').replace('.','')
 
+@bp.route('/')
+@bp.route('/wiki/<article>')
+def wiki(article = ''):
+    if(article == ''):
+        article = current_app.config['START_PAGE']
+    article_f = formatPostLink(article)
+    if(article_f != article):
+        return redirect('/wiki/'+article_f)
+    
+    permlink = unformatPostLink(article_f)
+    try:
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        last_update = [db_get_all('SELECT timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(permlink,))[0][0]]
+
+        if post['json_metadata']['appdata']['user']:
+            last_update.append(post['json_metadata']['appdata']['user'])
+
+        body = Markup(xssEscape(wikifyBody(post.body)))
+        return render_template('wiki.html',post=post,body=body,last_update=last_update)
+    
+    except:
+        post = {'title': article_f, 'body': 'Article not found. [Create](/create/'+article_f+') it now!'}
+        return render_template('wiki.html',post=post,body=post['body'])
+    
+@bp.route('/@<username>/<hive_post>')
+def reroute(username, hive_post):
+    if(username == current_app.config['WIKI_USER']):
+        return redirect('/wiki/'+hive_post)
+    else:
+        return redirect('/')
+
 @bp.route('/source/<article>')
 def source(article):
     article_f = formatPostLink(article)
@@ -308,7 +308,7 @@ def source(article):
 def history(article):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/source/'+article_f)
+        return redirect('/history/'+article_f)
     
     permlink = unformatPostLink(article_f)
     try:
@@ -319,20 +319,35 @@ def history(article):
     edits = db_get_all('SELECT trx_id, timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC',(permlink,))
     return render_template('history.html',post=post,permlink=article_f,edits=edits)
 
+@bp.route('/revision/<trx_id>')
+def revision_raw(trx_id):
+    return redirect('/history/'+formatPostLink(db_get_all('SELECT permlink FROM comments WHERE trx_id=%s LIMIT 1;',(trx_id,))[0][0])+'/revision/'+trx_id)
+
 @bp.route('/history/<article>/revision/<trx_id>')
 def revision(article, trx_id):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/source/'+article_f)
+        return redirect('/history/'+article_f+'/revision/'+trx_id)
     
     permlink = unformatPostLink(article_f)
-    try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
-    except:
-        return redirect('/create/'+article_f)
+    hive = Blockchain()
+    post = hive.get_transaction(trx_id)
+    post = post['operations'][0]['value']
+    post['json_metadata'] = json.loads(post['json_metadata'])
 
     body = Markup(xssEscape(wikifyBody(getRevisionBody(permlink,trx_id))))
-    return render_template('wiki.html',post=post,body=body)
+    last_update = [db_get_all('SELECT timestamp FROM comments WHERE trx_id=%s LIMIT 1;',(trx_id,))[0][0],post['json_metadata']['appdata']['user']]
+    comment = Comment(current_app.config['WIKI_USER']+'/'+permlink)
+    latest_update = [comment['updated'],comment['json_metadata']['appdata']['user']]
+    latest_revision = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(permlink,))[0][0]
+    if(latest_revision == trx_id):
+        return redirect('/wiki/'+article)
+    try:
+        older_revision = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s AND timestamp < %s ORDER BY timestamp DESC LIMIT 1',(permlink,last_update[0]))[0][0]
+    except:
+        older_revision = ''
+    newer_revision = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s AND timestamp > %s ORDER BY timestamp ASC LIMIT 1',(permlink,last_update[0]))[0][0]
+    return render_template('wiki.html',post=post,body=body,last_update=last_update,revision=trx_id,permlink=article_f,latest_update=latest_update,latest_revision=latest_revision,older_revision=older_revision,newer_revision=newer_revision)
 
 def getRevisionBody(permlink,trx_id):
     dmp = diff_match_patch()
@@ -370,8 +385,8 @@ def compare(article, revision_1, revision_2):
 
     
     permlink = unformatPostLink(article)
-    body_1 = replaceLinebreaks(getRevisionBody(permlink,revision_1))
-    body_2 = replaceLinebreaks(getRevisionBody(permlink,revision_2))
+    body_1 = Markup(replaceLinebreaks(getRevisionBody(permlink,revision_1)))
+    body_2 = Markup(replaceLinebreaks(getRevisionBody(permlink,revision_2)))
 
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
@@ -405,13 +420,21 @@ def random_article():
 
 @bp.route('/activity')
 def activity():
-    return render_template('activity.html',edits=db_get_all('SELECT trx_id, timestamp FROM comments ORDER BY timestamp DESC;'),notabs=True)
+    data = db_get_all('SELECT trx_id, timestamp, permlink, author FROM comments ORDER BY timestamp DESC;')
+    edits = []
+    for i, edit in enumerate(data):
+        edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3]])
+    return render_template('activity.html',edits=edits,notabs=True)
 
 @bp.route('/contributions')
 def contributions():
     if('username' not in session):
         return redirect('/login')
-    return render_template('contributions.html',edits=db_get_all('SELECT timestamp, trx_id FROM comments WHERE author=%s ORDER BY timestamp DESC;',(session['username'],)),notabs=True)
+    data = db_get_all('SELECT trx_id, timestamp, permlink FROM comments WHERE author=%s ORDER BY timestamp DESC;',(session['username'],))
+    edits = []
+    for i, edit in enumerate(data):
+        edits.append([edit[0],edit[1],formatPostLink(edit[2])])
+    return render_template('contributions.html',edits=edits,notabs=True)
 
 @bp.route('/admin')
 def admin():

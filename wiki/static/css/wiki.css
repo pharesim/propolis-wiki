@@ -726,3 +726,17 @@ p.message {
   .system-generated ins ~ del {
 	display: none;
   }
+
+  .mw-message-box {
+	background-color: #fef6e7;
+  	border-color: #a66200;
+	color: #000;
+	box-sizing: border-box;
+	margin-bottom: 16px;
+	border: 1px solid #54595d;
+	padding: 12px 24px;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+	overflow: hidden;
+	font-size: 84%;
+  }
