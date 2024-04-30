@@ -3,25 +3,24 @@
 {% block content %}
 <h1>Compare revisions of {{ post.title }}</h1>
 This is a comparison between revisions 
-<a href="/history/{{ permlink }}/revision/{{ revision_1 }}">{{ revision_1 }}</a> 
-and
-<a href="/history/{{ permlink }}/revision/{{ revision_2 }}">{{ revision_2 }}</a> 
 <div class="card">
     <div class="row">
         <div class="col">
-            <h4>Document with changes</h4>
+            <h4><a href="/history/{{ permlink }}/revision/{{ data_2[2] }}">{{ data_2[2] }}</a></h4>
+            <div>Edited on {{ data_2[0] }} by <a href="https://hive.blog/@{{ data_2[1] }}">@{{data_2[1] }}</a></div>
             <div class="card current-document" id="output"></div>
         </div>
         <div class="col">
-            <h4>Original Document</h4>
+            <h4><a href="/history/{{ permlink }}/revision/{{ data_1[2] }}">{{ data_1[2] }}</a></h4>
+            <div>Edited on {{ data_1[0] }} by <a href="https://hive.blog/@{{ data_1[1] }}">@{{data_1[1] }}</a></div>
             <div class="card system-generated" id="outputNew"></div>
         </div>
     </div>
 </div>
 <script src="{{ url_for('static', filename='js/vendor/htmldiff.js') }}"></script>
 <script>
-originalHTML = '{{ body_1 }}';
-newHTML = '{{ body_2 }}';
+originalHTML = '{{ body_1 }}'.replace('|0x27|',"'");
+newHTML = '{{ body_2 }}'.replace('|0x27|',"'");
 // Diff HTML strings
 let output = htmldiff(originalHTML, newHTML);
 let input = htmldiff(newHTML, originalHTML);

@@ -260,6 +260,30 @@ def wikifyBody(oldBody):
 def toHtmlId(string):
     return string.replace(' ','').replace(',','').replace(':','').replace('.','')
 
+def getRevisionBody(permlink,trx_id):
+    dmp = diff_match_patch()
+    last_edit = db_get_all('SELECT trx_id, timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1;',(permlink,))[0]
+    hive = Blockchain()
+    patch = []
+    if(last_edit[0] == trx_id):
+        body = Comment(current_app.config['WIKI_USER']+'/'+permlink).body
+    else:
+        timestamp = db_get_all('SELECT timestamp FROM comments WHERE trx_id=%s ORDER BY timestamp DESC LIMIT 1;',(trx_id,))[0][0]
+        edits_before = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s and timestamp <= %s ORDER BY timestamp ASC',(permlink,timestamp,))
+        body = ''
+        for edit in edits_before:
+            rev = hive.get_transaction(edit[0])['operations'][0]['value']
+            try:
+                patch += (dmp.patch_fromText(rev['body']))
+            except: 
+                body = rev['body']
+    if(len(patch) > 0):
+        body = dmp.patch_apply(patch,body)[0]
+    return restoreSource(body)
+
+def replaceLinebreaks(body):
+    return body.replace("\n",'<br>')
+
 @bp.route('/')
 @bp.route('/wiki/<article>')
 def wiki(article = ''):
@@ -349,43 +373,21 @@ def revision(article, trx_id):
     newer_revision = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s AND timestamp > %s ORDER BY timestamp ASC LIMIT 1',(permlink,last_update[0]))[0][0]
     return render_template('wiki.html',post=post,body=body,last_update=last_update,revision=trx_id,permlink=article_f,latest_update=latest_update,latest_revision=latest_revision,older_revision=older_revision,newer_revision=newer_revision)
 
-def getRevisionBody(permlink,trx_id):
-    dmp = diff_match_patch()
-    last_edit = db_get_all('SELECT trx_id, timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1;',(permlink,))[0]
-    hive = Blockchain()
-    patch = []
-    if(last_edit[0] == trx_id):
-        body = Comment(current_app.config['WIKI_USER']+'/'+permlink).body
-    else:
-        timestamp = db_get_all('SELECT timestamp FROM comments WHERE trx_id=%s ORDER BY timestamp DESC LIMIT 1;',(trx_id,))[0][0]
-        edits_before = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s and timestamp <= %s ORDER BY timestamp ASC',(permlink,timestamp,))
-        body = ''
-        for edit in edits_before:
-            rev = hive.get_transaction(edit[0])['operations'][0]['value']
-            try:
-                patch += (dmp.patch_fromText(rev['body']))
-            except: 
-                body = rev['body']
-    if(len(patch) > 0):
-        body = dmp.patch_apply(patch,body)[0]
-    return restoreSource(body)
-
-def replaceLinebreaks(body):
-    return body.replace("\n",'<br>')
-
 @bp.route('/history/<article>/compare/<revision_1>/<revision_2>')
 def compare(article, revision_1, revision_2):
     article_f = formatPostLink(article)
     if(article_f != article):
         return redirect('/compare/'+article_f+'/'+revision_1+'/'+revision_2)   
     permlink = unformatPostLink(article)
-    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1))).replace("'","0x27"))
-    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2))).replace("'","0x27"))   
+    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1))).replace("'","|0x27|"))
+    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2))).replace("'","|0x27|"))
+    data_1 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_1,))[0]
+    data_2 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_2,))[0]
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
     except:
         return redirect('/create/'+article_f)
-    return render_template('compare.html',post=post,permlink=formatPostLink(permlink),revision_1=revision_1,revision_2=revision_2,body_1=body_1,body_2=body_2)
+    return render_template('compare.html',post=post,permlink=formatPostLink(permlink),body_1=body_1,body_2=body_2,data_1=data_1,data_2=data_2)
     
 @bp.route('/wiki/Categories:Overview')
 def categories():
