@@ -37,7 +37,6 @@ while 1 == 1:
         if(op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
             startblock = op['block']
             post = Comment(conf['WIKI_USER']+"/"+op['permlink'])
-            #tx = hive.get_transaction(op['trx_id'])
             metadata = json.loads(op['json_metadata'])
             tags = metadata['tags']
             abstract = ''
