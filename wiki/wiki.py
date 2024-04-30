@@ -358,7 +358,7 @@ def activity():
             before = db_get_all('SELECT trx_id, permlink FROM comments WHERE permlink = %s AND timestamp<%s ORDER BY timestamp DESC LIMIT 1;',(edit[2],edit[1],))[0]
             edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3],before[0]])
         except:
-            edits = edits
+            edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3],''])
     return render_template('activity.html',edits=edits,notabs=True)
 
 @bp.route('/history/<article>')
