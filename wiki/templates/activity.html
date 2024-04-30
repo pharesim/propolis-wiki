@@ -18,7 +18,10 @@ This is a full list of edits on all articles
         {% for edit in edits %}
         <tr>
             <td id="edit_{{ edit[0] }}_time">{{ edit[1] }}</td>
-            <td id="edit_{{ edit[0] }}_revision"><a href="/history/{{ edit[2] }}/revision/{{ edit[0] }}">{{ edit[0] }}</a></td>
+            <td id="edit_{{ edit[0] }}_revision">
+                <a href="/history/{{ edit[2] }}/revision/{{ edit[0] }}">{{ edit[0] }}</a>
+                (<a href="/history/{{ edit[2] }}/compare/{{ edit[4] }}/{{ edit[0] }}">Difference</a>)
+            </td>
             <td id="edit_{{ edit[0] }}_title"><a href="/wiki/{{ edit[2] }}">{{ edit[2] }}</a></td>
             <td id="edit_{{ edit[0] }}_user"><a href="https://hive.blog/@{{ edit[3] }}">{{ edit[3] }}</a></td>
             <td id="edit_{{ edit[0] }}_reason"></td>

@@ -345,7 +345,19 @@ def source(article):
     
     except:
         return redirect('/create/'+article_f)
-    
+
+@bp.route('/activity')
+def activity():
+    data = db_get_all('SELECT trx_id, timestamp, permlink, author FROM comments ORDER BY timestamp DESC;')
+    edits = []
+    for i, edit in enumerate(data):
+        try:
+            before = db_get_all('SELECT trx_id, permlink FROM comments WHERE permlink = %s AND timestamp<%s ORDER BY timestamp DESC LIMIT 1;',(edit[2],edit[1],))[0]
+            edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3],before[0]])
+        except:
+            edits = edits
+    return render_template('activity.html',edits=edits,notabs=True)
+
 @bp.route('/history/<article>')
 def history(article):
     article_f = formatPostLink(article)
@@ -397,8 +409,8 @@ def compare(article, revision_1, revision_2):
     if(article_f != article):
         return redirect('/compare/'+article_f+'/'+revision_1+'/'+revision_2)   
     permlink = unformatPostLink(article)
-    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|"))))
-    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|"))))
+    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
+    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
     data_1 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_1,))[0]
     data_2 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_2,))[0]
     try:
@@ -430,14 +442,6 @@ def random_article():
     import random
     rand = random.randint(0, len(permlinks)-1)
     return redirect('/wiki/'+permlinks[rand][0])
-
-@bp.route('/activity')
-def activity():
-    data = db_get_all('SELECT trx_id, timestamp, permlink, author FROM comments ORDER BY timestamp DESC;')
-    edits = []
-    for i, edit in enumerate(data):
-        edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3]])
-    return render_template('activity.html',edits=edits,notabs=True)
 
 @bp.route('/contributions')
 def contributions():

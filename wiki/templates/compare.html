@@ -21,10 +21,8 @@ This is a comparison between revisions
 <script>
 originalHTML = '{{ body_1 }}'.replaceAll('|0x27|',"'");
 newHTML = '{{ body_2 }}'.replaceAll('|0x27|',"'");
-// Diff HTML strings
 let output = htmldiff(originalHTML, newHTML);
 let input = htmldiff(newHTML, originalHTML);
-// Show HTML diff output as HTML!
 document.getElementById("output").innerHTML = output.replace('<br>',"\n");
 document.getElementById("outputNew").innerHTML = input.replace('<br>',"\n");
 </script>
