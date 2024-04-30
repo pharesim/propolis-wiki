@@ -32,14 +32,13 @@
 					<ul>
 						<li><a href="/">Main page</a></li>
 						<li><a href="/wiki/Categories:Overview">Categories</a></li>
-						<li><a href="/random">Random article</a></li>
-						<li><a href="/activity">Activity</a></li>
+						<li><a href="/random">Random article</a></li>						
 					</ul>
 					<h3>Interaction</h3>
 					<ul>
-						<li><a href="#">Help</a></li>
-						<li><a href="#">About</a></li>
-						<li><a href="#">Portal</a></li>
+						<li><a href="/activity">Activity</a></li>
+						<li><a href="/help">Help</a></li>
+						<li><a href="/about">About</a></li>
 					</ul>
 					{% if session.username is defined and session.userlevel > 1 %}
 					<h3>Administration</h3>
@@ -124,14 +123,11 @@
 					{% endif %}
 					{% endblock %}
 					<div class="footerlinks">
-						<a href="#">Privacy policy</a> <a href="#">About</a> <a href="#">Terms and conditions</a> <a href="#">Cookie statement</a> <a href="#">Developers</a>
+						<a href="/privacy">Privacy policy</a> <a href="/about">About</a> <a href="/terms">Terms and conditions</a> <a href="cookies">Cookie statement</a> <a href="/developers">Developers</a>
 					</div>
-				</div>
-			
-			
+				</div>			
 			</div>		
 		</div>
-
         <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
     </body>
 </html>

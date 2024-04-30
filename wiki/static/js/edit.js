@@ -1,6 +1,6 @@
 const { Editor } = toastui;
 
-const { colorSyntax, tableMergedCell, uml, reference  } = Editor.plugin;
+const { tableMergedCell, reference  } = Editor.plugin;
 
 const editor = new Editor({
     el: document.getElementById('editor'),
@@ -14,7 +14,7 @@ const editor = new Editor({
         ['code', 'codeblock'],],
     initialValue: document.getElementById('editor').innerHTML,
     initialEditType: 'markdown', // wysiwyg
-    plugins: [latexPlugin, colorSyntax, tableMergedCell, uml],
+    plugins: [latexPlugin, tableMergedCell],
     extendedAutolinks: true,
     hideModeSwitch: true,
 });
