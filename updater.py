@@ -35,6 +35,7 @@ while 1 == 1:
     cur = conn.cursor()
     for op in acc.history(only_ops=['comment'],start=startblock):
         if(op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
+            pprint('Transaction '+op['trx_id'])
             startblock = op['block']
             post = Comment(conf['WIKI_USER']+"/"+op['permlink'])
             metadata = json.loads(op['json_metadata'])
@@ -63,6 +64,5 @@ while 1 == 1:
     conn.commit()
     cur.close()
     time.sleep(3)
-    pprint('sleeping')
 
 conn.close()
