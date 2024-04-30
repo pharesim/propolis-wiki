@@ -591,6 +591,9 @@ span.user {
 	#simpleSearch {
 		display: none;
 	}
+	span.longstring {
+		display: none;
+	}
 }
 
 input.pagetitle {
