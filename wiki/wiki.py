@@ -337,9 +337,9 @@ def revision(article, trx_id):
 
     body = Markup(xssEscape(wikifyBody(getRevisionBody(permlink,trx_id))))
     last_update = [db_get_all('SELECT timestamp FROM comments WHERE trx_id=%s LIMIT 1;',(trx_id,))[0][0],post['json_metadata']['appdata']['user']]
-    comment = Comment(current_app.config['WIKI_USER']+'/'+permlink)
-    latest_update = [comment['updated'],comment['json_metadata']['appdata']['user']]
-    latest_revision = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(permlink,))[0][0]
+    latest = db_get_all('SELECT trx_id, timestamp, author FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(permlink,))[0]
+    latest_update = [latest[1],latest[2]]
+    latest_revision = latest[0]
     if(latest_revision == trx_id):
         return redirect('/wiki/'+article)
     try:
@@ -362,13 +362,10 @@ def getRevisionBody(permlink,trx_id):
         body = ''
         for edit in edits_before:
             rev = hive.get_transaction(edit[0])['operations'][0]['value']
-            if(body == ''):
+            try:
+                patch += (dmp.patch_fromText(rev['body']))
+            except: 
                 body = rev['body']
-            else:
-                try:
-                    patch += (dmp.patch_fromText(rev['body']))
-                except: 
-                    body = rev['body']
     if(len(patch) > 0):
         body = dmp.patch_apply(patch,body)
         body = body[0]
@@ -381,13 +378,10 @@ def replaceLinebreaks(body):
 def compare(article, revision_1, revision_2):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/compare/'+article_f+'/'+revision_1+'/'+revision_2)
-
-    
+        return redirect('/compare/'+article_f+'/'+revision_1+'/'+revision_2)   
     permlink = unformatPostLink(article)
-    body_1 = Markup(replaceLinebreaks(getRevisionBody(permlink,revision_1)))
-    body_2 = Markup(replaceLinebreaks(getRevisionBody(permlink,revision_2)))
-
+    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1))).replace("'","0x27"))
+    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2))).replace("'","0x27"))   
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
     except:

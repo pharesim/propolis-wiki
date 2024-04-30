@@ -20,8 +20,8 @@ and
 </div>
 <script src="{{ url_for('static', filename='js/vendor/htmldiff.js') }}"></script>
 <script>
-originalHTML = `{{ body_1 }}`;
-newHTML = `{{ body_2 }}`;
+originalHTML = '{{ body_1 }}';
+newHTML = '{{ body_2 }}';
 // Diff HTML strings
 let output = htmldiff(originalHTML, newHTML);
 let input = htmldiff(newHTML, originalHTML);

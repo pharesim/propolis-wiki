@@ -12,7 +12,7 @@
     (<a href="/history/{{ permlink }}/compare/{{ older_revision }}/{{ revision }}" title="{{ post.title }}">
         Difference</a>
     )
-    <a href="/history/{{ permlink }}/{{ older_revision }}/revision" title="{{ post.title }}">
+    <a href="/history/{{ permlink }}/revision/{{ older_revision }}" title="{{ post.title }}">
         ← older version
     </a> | 
     {% endif %}
@@ -27,9 +27,6 @@
     </a>)
     {% endif %}
 </div>
-<script>
-    document.getElementById('latest_updated').innerHTML = new Date(document.getElementById('latest_updated').innerHTML).toString();
-</script>
 {% endif %}
 <h1 id="title">{{ post.title }}</h1>
 {% include 'helpers/editor.html' %}
