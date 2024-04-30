@@ -126,7 +126,7 @@ def edit(article_title):
     if 'username' in session.keys():
         try:
             post = Comment(current_app.config['WIKI_USER']+"/"+unformatPostLink(article_title))
-            body = Markup(xssEscape(restoreSource(post.body)));
+            body = Markup(xssEscape(restoreSource(post.body)))
             return render_template('edit.html',post=post,body=body,article_title=post.title)
     
         except:
@@ -176,6 +176,7 @@ def wikifyInternalLinks(body):
 
 def wikifyBody(oldBody):
     new_body = restoreSource(oldBody)
+
     references = {}
     refsplit = new_body.replace('<ref name=multiple>','<ref>').split("<ref>")
     new_body = refsplit[0]
@@ -203,30 +204,7 @@ def wikifyBody(oldBody):
             new_body += '<span id="reference_'+str(i+1)+'">'+val+"</span>\n"
             i = i+1
 
-    related = []
-    relsplit = new_body.split("](/wiki/")
-    if(len(relsplit) > 1):
-        new_body = ''
-        for i, val in enumerate(relsplit):
-            relrest = val.split(")")
-            fullrest = relrest[1]
-            link = relrest[0]
-            if(i > 0):
-                rel = '['+title+'](/wiki/'+link+')'
-                exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(link,))
-                tuple = (rel,exists)      
-                if ':' not in link and tuple not in related:                         
-                    related.append(tuple)
-                new_body += '](/wiki/'
-            relbef = val.split("[")
-            split = relbef[0].split(')',1)
-            link = split[0]
-            new_body += link+')'+split[1]
-            if(len(relbef) > 1):
-                for j, v in enumerate(relbef):
-                    if j > 0:
-                        title = v
-                        new_body += "["+title
+    related, new_body = getRelated(new_body)
 
     if len(related) > 0:
         new_body += "\n## Related Articles\n"
@@ -234,7 +212,6 @@ def wikifyBody(oldBody):
             new_body += "<span"
             if(val[1] < 1):
                 new_body += ' class="article404"'
-                new_body = new_body.replace(val[0],'<span class="article404">'+val[0]+'</span>')
             new_body += '>'+val[0]+"</span>\n"
 
     headers = new_body.split("\n## ")
@@ -272,6 +249,37 @@ def wikifyBody(oldBody):
             z[0] = '<span id="'+toHtmlId(z[0])+'">'+z[0]+'</span>'
         new_body = headers[0]+contents+"\n\n"+'## '+z[0]+"\n"+z[1]
     return new_body
+
+def getRelated(new_body):
+    related = []
+    splitters = ["](/wiki/",")","["]
+    relsplit = new_body.split(splitters[0])
+    if(len(relsplit) > 1):
+        new_body = ''
+        for i, val in enumerate(relsplit):
+            relrest = val.split(splitters[1])
+            link = relrest[0]
+            if(i > 0):
+                rel = splitters[2]+title+splitters[0]+link+splitters[1]
+                exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(link,))
+                tuple = (rel,exists)      
+                if ':' not in link and tuple not in related:                         
+                    related.append(tuple)
+                new_body += '](/wiki/'
+            relbef = val.split(splitters[2])
+            split = relbef[0].split(splitters[1],1)
+            link = split[0]
+            new_body += link+splitters[1]+split[1]
+            if(len(relbef) > 1):
+                for j, v in enumerate(relbef):
+                    if j > 0:
+                        title = v
+                        new_body += splitters[2]+title
+    if len(related) > 0:
+        for val in related:
+            if(val[1] < 1):
+                new_body = new_body.replace(val[0],'<span class="article404">'+val[0]+'</span>')
+    return related, new_body
     
 def toHtmlId(string):
     return string.replace(' ','').replace(',','').replace(':','').replace('.','')
@@ -395,8 +403,8 @@ def compare(article, revision_1, revision_2):
     if(article_f != article):
         return redirect('/compare/'+article_f+'/'+revision_1+'/'+revision_2)   
     permlink = unformatPostLink(article)
-    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1))).replace("'","|0x27|"))
-    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2))).replace("'","|0x27|"))
+    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|"))))
+    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|"))))
     data_1 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_1,))[0]
     data_2 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_2,))[0]
     try:

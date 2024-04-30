@@ -19,8 +19,8 @@ This is a comparison between revisions
 </div>
 <script src="{{ url_for('static', filename='js/vendor/htmldiff.js') }}"></script>
 <script>
-originalHTML = '{{ body_1 }}'.replace('|0x27|',"'");
-newHTML = '{{ body_2 }}'.replace('|0x27|',"'");
+originalHTML = '{{ body_1 }}'.replaceAll('|0x27|',"'");
+newHTML = '{{ body_2 }}'.replaceAll('|0x27|',"'");
 // Diff HTML strings
 let output = htmldiff(originalHTML, newHTML);
 let input = htmldiff(newHTML, originalHTML);
