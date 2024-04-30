@@ -266,10 +266,7 @@ h2 {
 	border-bottom: 1px solid #a2a9b1!important;
 	line-height: 1.4em!important;
 	padding-bottom: 0em!important;
-}
-{
 	font-weight: bold!important;
-	font-size: 1.2em!important;
 }
 p.roleNote {
 	padding: 1em 0 0 1.6em;
@@ -483,7 +480,7 @@ span.user {
 	display: inline-block!important;
 	margin-right: 8px!important;
 }
-.contentsPanel ul {#
+.contentsPanel ul {
 	margin-left: 0!important;
 	padding: 0 0 5px 5px!important;
 }

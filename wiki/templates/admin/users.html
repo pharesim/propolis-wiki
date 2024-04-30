@@ -3,10 +3,6 @@
 {% block content %}
 <h1>User management</h1>
 
-{% with messages = get_flashed_messages()%}{% if messages%}{% for message in messages%}
-<p class="message">{{ message }}</p>
-{% endfor %}{% endif %}{% endwith %}
-
 <h2>Add user</h2>
 <input id="new_user_username" placeholder="username" />
 <select id="new_user_userlevel">
