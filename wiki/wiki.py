@@ -267,8 +267,11 @@ def getRelated(new_body):
                 new_body += splitters[0]
             relbef = val.split(splitters[2])
             split = relbef[0].split(splitters[1],1)
-            link = formatPostLink(split[0])
-            new_body += link+splitters[1]+split[1]
+            link = split[0]
+            if(len(split) == 1):
+                new_body += relbef[0]
+            else:
+                new_body += formatPostLink(link)+splitters[1]+split[1]
             if(len(relbef) > 1):
                 for j, v in enumerate(relbef):
                     if j > 0:
