@@ -367,8 +367,7 @@ def getRevisionBody(permlink,trx_id):
             except: 
                 body = rev['body']
     if(len(patch) > 0):
-        body = dmp.patch_apply(patch,body)
-        body = body[0]
+        body = dmp.patch_apply(patch,body)[0]
     return restoreSource(body)
 
 def replaceLinebreaks(body):
