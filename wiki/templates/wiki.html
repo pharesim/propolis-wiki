@@ -31,9 +31,9 @@
 <h1 id="title">{{ post.title }}</h1>
 {% include 'helpers/editor.html' %}
 <div class="categories">
-    {% for tag in post.json_metadata.tags %}{% if tag != 'wiki' %}
+    {% if json_metadata in post %}{% for tag in post.json_metadata.tags %}{% if tag != 'wiki' %}
     <a href="/wiki/Category:{{ tag | capitalize }}">{{ tag | capitalize }}</a>
-    {% endif %}{% endfor %}
+    {% endif %}{% endfor %}{% endif %}
 </div>
 <script src="{{ url_for('static', filename='js/wiki.js') }}"></script>
 {% endblock %}

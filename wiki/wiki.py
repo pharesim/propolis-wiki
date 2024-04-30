@@ -203,9 +203,7 @@ def wikifyBody(oldBody):
                 new_body += '<a class="toref" href="#cite_ref'+str(i+1)+'_'+str(j)+'">↑</a> ';
             new_body += '<span id="reference_'+str(i+1)+'">'+val+"</span>\n"
             i = i+1
-
     related, new_body = getRelated(new_body)
-
     if len(related) > 0:
         new_body += "\n## Related Articles\n"
         for val in related:
@@ -261,15 +259,15 @@ def getRelated(new_body):
             link = relrest[0]
             if(i > 0):
                 rel = splitters[2]+title+splitters[0]+link+splitters[1]
-                exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(link,))
+                exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(unformatPostLink(link),))
                 tuple = (rel,exists)      
                 if ':' not in link and tuple not in related:                         
                     related.append(tuple)
-                new_body += '](/wiki/'
+                new_body += splitters[0]
             relbef = val.split(splitters[2])
             split = relbef[0].split(splitters[1],1)
             link = split[0]
-            new_body += link+splitters[1]+split[1]
+            new_body += relbef[0]
             if(len(relbef) > 1):
                 for j, v in enumerate(relbef):
                     if j > 0:
@@ -315,19 +313,15 @@ def wiki(article = ''):
         article = current_app.config['START_PAGE']
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/wiki/'+article_f)
-    
+        return redirect('/wiki/'+article_f)  
     permlink = unformatPostLink(article_f)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
         last_update = [db_get_all('SELECT timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(permlink,))[0][0]]
-
-        if post['json_metadata']['appdata']['user']:
-            last_update.append(post['json_metadata']['appdata']['user'])
-
+        if post.json_metadata['appdata']['user']:
+            last_update.append(post.json_metadata['appdata']['user'])   
         body = Markup(xssEscape(wikifyBody(post.body)))
-        return render_template('wiki.html',post=post,body=body,last_update=last_update)
-    
+        return render_template('wiki.html',post=post,body=body,last_update=last_update)  
     except:
         post = {'title': article_f, 'body': 'Article not found. [Create](/create/'+article_f+') it now!'}
         return render_template('wiki.html',post=post,body=post['body'])
