@@ -54,7 +54,7 @@ def xssEscape(string):
             'td': ['colspan'],
             'a': ['href', 'id', 'class'],
             'div': ['class'],
-            'span': ['id'],
+            'span': ['id','class'],
         }
     )
     return string
@@ -95,9 +95,9 @@ def before_request():
 def redirect_home():
     return redirect('/')
 
-@bp.route('/article')
-def article():
-    return render_template('article.html')
+@bp.route('/pages/<page>')
+def pages(page):
+    return render_template(page+'.html')
 
 @bp.route('/create')
 @bp.route('/create/<article_title>')
@@ -206,20 +206,36 @@ def wikifyBody(oldBody):
     related = []
     relsplit = new_body.split("](/wiki/")
     if(len(relsplit) > 1):
+        new_body = ''
         for i, val in enumerate(relsplit):
+            relrest = val.split(")")
+            fullrest = relrest[1]
+            link = relrest[0]
             if(i > 0):
-                relrest = val.split(")")
-                link = relrest[0]
                 rel = '['+title+'](/wiki/'+link+')'
-                if ':' not in link and rel not in related:
-                    related.append(rel)
-            relrest = val.split("[")
-            title = relrest[-1][:1].upper()+relrest[-1][1:]
+                exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(link,))
+                tuple = (rel,exists)      
+                if ':' not in link and tuple not in related:                         
+                    related.append(tuple)
+                new_body += '](/wiki/'
+            relbef = val.split("[")
+            split = relbef[0].split(')',1)
+            link = split[0]
+            new_body += link+')'+split[1]
+            if(len(relbef) > 1):
+                for j, v in enumerate(relbef):
+                    if j > 0:
+                        title = v
+                        new_body += "["+title
 
     if len(related) > 0:
         new_body += "\n## Related Articles\n"
         for val in related:
-            new_body += val+"\n"
+            new_body += "<span"
+            if(val[1] < 1):
+                new_body += ' class="article404"'
+                new_body = new_body.replace(val[0],'<span class="article404">'+val[0]+'</span>')
+            new_body += '>'+val[0]+"</span>\n"
 
     headers = new_body.split("\n## ")
     if(len(headers) > 1):

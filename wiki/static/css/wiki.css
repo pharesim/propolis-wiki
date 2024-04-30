@@ -727,6 +727,10 @@ p.message {
 	display: none;
   }
 
+  span.article404 a {
+	color: darkred!important;
+  }
+
   .mw-message-box {
 	background-color: #fef6e7;
   	border-color: #a66200;
