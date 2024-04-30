@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, session, url_for, current_app
+    Blueprint, flash, redirect, render_template, session, current_app
 )
 from werkzeug.exceptions import abort
 
