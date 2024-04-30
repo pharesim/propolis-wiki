@@ -741,3 +741,10 @@ p.message {
 	overflow: hidden;
 	font-size: 84%;
   }
+
+  .comment {
+	border: 1px solid #54595d;
+	padding: 12px 24px;
+	box-sizing: border-box;
+	margin-bottom: 16px;
+  }

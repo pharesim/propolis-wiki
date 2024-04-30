@@ -47,14 +47,14 @@ def db_count(query,data = ()):
 def xssEscape(string):
     string = bleach.clean(
         string,
-        tags = {'p','table','thead','th','tbody','td','tr','sup','a','br','div','span','ul','li','ref'},
-        attributes = { 
-            'p': ['class'],
-            'th': ['colspan'],
-            'td': ['colspan'],
-            'a': ['href', 'id', 'class'],
+        tags = {'a','br','b','center','div','h4','i','li','p','ref','span','sub','sup','table','tbody','td','thead','th','tr','ul'},
+        attributes = {
+            'a': ['class', 'href', 'id', 'title'],
             'div': ['class'],
-            'span': ['id','class'],
+            'p': ['class','id'],
+            'span': ['class','id','title'],
+            'td': ['colspan'],
+            'th': ['colspan'],
         }
     )
     return string
@@ -97,7 +97,7 @@ def redirect_home():
 
 @bp.route('/pages/<page>')
 def pages(page):
-    return render_template(page+'.html')
+    return render_template(page+'.html',notabs=True)
 
 @bp.route('/create')
 @bp.route('/create/<article_title>')
@@ -207,7 +207,7 @@ def wikifyBody(oldBody):
     if len(related) > 0:
         new_body += "\n## Related Articles\n"
         for val in related:
-            new_body += "<span"
+            new_body += '<span title="'+val[2]+'"'
             if(val[1] < 1):
                 new_body += ' class="article404"'
             new_body += '>'+val[0]+"</span>\n"
@@ -260,7 +260,7 @@ def getRelated(new_body):
             if(i > 0):
                 rel = splitters[2]+title+splitters[0]+link+splitters[1]
                 exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(unformatPostLink(link),))
-                tuple = (rel,exists)      
+                tuple = (rel,exists,title)      
                 if ':' not in link and tuple not in related:                         
                     related.append(tuple)
                 new_body += splitters[0]
@@ -275,8 +275,10 @@ def getRelated(new_body):
                         new_body += splitters[2]+title
     if len(related) > 0:
         for val in related:
+            string = '<span title="'+val[2]+'"'
             if(val[1] < 1):
-                new_body = new_body.replace(val[0],'<span class="article404">'+val[0]+'</span>')
+                string += ' class="article404"'
+            new_body = new_body.replace(val[0],string+'>'+val[0]+'</span>')
     return related, new_body
     
 def toHtmlId(string):
@@ -419,6 +421,19 @@ def compare(article, revision_1, revision_2):
         return redirect('/create/'+article_f)
     return render_template('compare.html',post=post,permlink=formatPostLink(permlink),body_1=body_1,body_2=body_2,data_1=data_1,data_2=data_2)
     
+@bp.route('/talk/<article>')
+def talk(article):
+    data = Comment(current_app.config['WIKI_USER']+'/'+unformatPostLink(article)).get_all_replies()
+    replies = []
+    for d in data:
+        re = {
+            'body': Markup(xssEscape('<p id="body_'+d.permlink+'">'+d.body+'</p>')),
+            'short': Markup(xssEscape('<p id="short_'+d.permlink+'">'+d.body[0:55]+'...</p>'))
+        }
+        replies.append(re)
+    return render_template('talk.html',data=data,replies=replies)
+
+
 @bp.route('/wiki/Categories:Overview')
 def categories():
     categories = db_get_all('SELECT category FROM categories ORDER BY category;')

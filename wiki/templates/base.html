@@ -78,10 +78,10 @@
 					<div class="tabsLeft">
 						<ul>
 							{% if notabs is not defined %}
-							<li><a href="#" class="active">Article</a></li>
-							<li><a href="#">Talk</a></li>
+							<li><a href="/wiki/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'wiki' or request.path.split('/')[1] == 'source' or request.path.split('/')[1] == 'edit' or request.path.split('/')[1] == 'history' %}active{% endif %}">Article</a></li>
+							<li><a href="/talk/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'talk' %}active{% endif %}">Talk</a></li>
 							{% else %}
-							<li><a href="#" class="active">{{ request.path[1:].capitalize() }}</a></li>
+							<li><a href="{{ request.path }}" class="active">{{ request.path[1:].capitalize() }}</a></li>
 							{% endif %}					
 						</ul>
 					</div>
