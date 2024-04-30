@@ -8,13 +8,23 @@
         <sub>{{ reply.author }} on {{ reply.created }}:</sub>
         <h3>{{ reply.title }}</h3>
         <div id="short_{{ reply.permlink }}">{{ replies[loop.index0].short }}</div>
-    </div> 
+    </div>
+    <button id="collapse_{{ reply.permlink }}" title="collapse"><i class="fas fa-chevron-up"></i></button>
     <div id="body_{{ reply.permlink }}">{{ replies[loop.index0].body }}</div>
     <script>
         document.getElementById("body_{{ reply.permlink }}").style.display = "none";
+        document.getElementById("collapse_{{ reply.permlink }}").style.display = "none";
+
         document.getElementById("header_{{ reply.permlink }}").addEventListener('click',function(){
             document.getElementById("body_{{ reply.permlink }}").style.display = "block";
+            document.getElementById("collapse_{{ reply.permlink }}").style.display = "block";
             document.getElementById("short_{{ reply.permlink }}").style.display = "none";
+        });
+        
+        document.getElementById("collapse_{{ reply.permlink }}").addEventListener('click',function(){
+            document.getElementById("body_{{ reply.permlink }}").style.display = "none";
+            document.getElementById("short_{{ reply.permlink }}").style.display = "block";
+            document.getElementById("collapse_{{ reply.permlink }}").style.display = "none";
         });
     </script>
 </div>
