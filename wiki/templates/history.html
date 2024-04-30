@@ -21,7 +21,7 @@ This is a full list of edits on the article
                 {% if loop.index0 > 0 %}<a href="/history/{{ permlink }}/compare/{{ edit[0] }}/{{ edits[0][0] }}">{% endif %}
                 Current
                 {% if loop.index0 > 0 %}</a>{% endif %} |
-                {% if loop.index0 < edits|length-1 %}<a href="/history/{{ permlink }}/compare/{{ edit[0] }}/{{ edits[loop.index0+1][0]}}">{% endif %}
+                {% if loop.index0 < edits|length-1 %}<a href="/history/{{ permlink }}/compare/{{ edits[loop.index0+1][0]}}/{{ edit[0] }}">{% endif %}
                 Previous
                 {% if loop.index0 < edits|length-1 %}</a>{% endif %}
             </td>
