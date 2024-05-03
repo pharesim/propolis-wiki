@@ -754,3 +754,13 @@ p.message {
 	box-sizing: border-box;
 	margin-bottom: 16px;
   }
+
+  .reply_form {
+	border: 1px solid #54595d;
+	width: fit-content;
+	box-sizing: border-box;
+	padding: 12px 24px;
+  }
+  .right {
+	text-align: right;
+  }

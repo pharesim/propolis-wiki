@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<script src="{{ url_for('static', filename='js/talk.js') }}"></script>
 <h1>Talk</h1>
 {% for reply in data %}
 <div class="comment">
@@ -10,23 +11,22 @@
         <div id="short_{{ reply.permlink }}">{{ replies[loop.index0].short }}</div>
     </div>
     <button id="collapse_{{ reply.permlink }}" title="collapse"><i class="fas fa-chevron-up"></i></button>
-    <div id="body_{{ reply.permlink }}">{{ replies[loop.index0].body }}</div>
-    <script>
-        document.getElementById("body_{{ reply.permlink }}").style.display = "none";
-        document.getElementById("collapse_{{ reply.permlink }}").style.display = "none";
-
-        document.getElementById("header_{{ reply.permlink }}").addEventListener('click',function(){
-            document.getElementById("body_{{ reply.permlink }}").style.display = "block";
-            document.getElementById("collapse_{{ reply.permlink }}").style.display = "block";
-            document.getElementById("short_{{ reply.permlink }}").style.display = "none";
-        });
-        
-        document.getElementById("collapse_{{ reply.permlink }}").addEventListener('click',function(){
-            document.getElementById("body_{{ reply.permlink }}").style.display = "none";
-            document.getElementById("short_{{ reply.permlink }}").style.display = "block";
-            document.getElementById("collapse_{{ reply.permlink }}").style.display = "none";
-        });
-    </script>
+    <div id="body_{{ reply.permlink }}">
+        {{ replies[loop.index0].body }}
+        <div>
+            <a href="#" id="reply_link_{{ reply.permlink }}">Reply</a>
+            <div id="reply_{{ reply.permlink }}" class="reply_form">
+                <h3>Your reply</h3>
+                <div>
+                    <input type="text" id="reply_title_{{ reply. permlink }}" placeholder="Reply title" />
+                    <button id="reply_collapse_{{ reply.permlink }}" title="collapse"><i class="fas fa-chevron-up"></i></button>
+                </div>
+                <textarea id="reply_text_{{ reply.permlink }}" placeholder="Reply text" rows="10" cols="80"></textarea>
+                <div class="right"><button id="reply_send_{{ reply.permlink }}">Send</button></div>
+            </div>
+        </div>
+    </div>
+    <script>applyListeners('{{ reply.permlink }}');</script>
 </div>
 {% endfor %}
 {% endblock %}
