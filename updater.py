@@ -1,10 +1,12 @@
 from beem import Hive
 from beem.account import Account
-from beem.comment import Comment
 from beem.blockchain import Blockchain
+from beem.comment import Comment
+from beem.transactionbuilder import TransactionBuilder
+from beem.wallet import Wallet
+from beembase import operations
 from beembase.signedtransactions import Signed_Transaction
 from beemgraphenebase.base58 import Base58
-from beem.wallet import Wallet
 
 from pprint import pprint
 import time
@@ -33,6 +35,8 @@ client = Hive()
 acc = Account(conf['WIKI_USER'])
 hive = Blockchain()
 w = Wallet()
+
+# start from block after wiki user account creation
 startblock = 0
 for op in acc.history(use_block_num=False,start=0,stop=1):
     startblock = op['block']
@@ -46,25 +50,44 @@ while 1 == 1:
         except:
             exists = False
 
+        # Only process comments that don't exist yet, were authored by the wiki user in the category wiki
         if(exists == False and op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
             pprint('Processing transaction '+op['trx_id'])
+
             metadata = json.loads(op['json_metadata'])
-            
-            signer = ''
+            if 'appdata' not in metadata or 'user' not in metadata['appdata']:
+                metadata['appdata']['user'] = None
+
             transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
+            signer = ''
             for key in transaction.verify(chain='HIVE2'):
                 owner = w.getAccountFromPublicKey('STM'+str(Base58(data=key)))
                 if(owner != None):
                     signer = owner
             try:
                 if(signer == metadata['appdata']['user']):
-                    signer = True
+                    s = True
                 else:
-                    signer = False
+                    s = False
             except:
-                signer = False
-            if(signer == False):
-                pprint("User in metadata isn't signer. Remove signer's access and print in log.")  
+                s = False
+            if(s == False):
+                pprint("User in metadata isn't signer. Removing signer's access.")
+                account = Account(conf['WIKI_USER'])
+                for i, auth in enumerate(account["posting"]["account_auths"]):
+                    if(auth[0] == signer):
+                        account['posting']['account_auths'].pop(i)
+                        op = operations.Account_update(**{"account": conf['WIKI_USER'],
+                            "posting": account["posting"],
+                            "memo_key": account["memo_key"],
+                            "json_metadata": account["json_metadata"]})
+                        tx = TransactionBuilder()
+                        tx.appendOps(op)
+                        tx.appendWif(conf['ACTIVE_KEY'])
+                        tx.sign()
+                        tx.broadcast()
+                        break
+                metadata['appdata']['user'] = None
             
             post = Comment(conf['WIKI_USER']+"/"+op['permlink'])           
             tags = metadata['tags']

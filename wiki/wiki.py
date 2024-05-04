@@ -83,7 +83,7 @@ def inject_session_data():
 def before_request():
     if 'username' not in session.keys():
         session.pop('userlevel',None)
-    if 'username' in session.keys() and 'userlevel' not in session.keys():
+    if 'username' in session.keys():
         userlevel = 0
         account = Account(current_app.config['WIKI_USER'])
         for key in account["posting"]["account_auths"]:
