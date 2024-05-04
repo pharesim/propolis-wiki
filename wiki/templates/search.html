@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Search results for '{{ search }}'</h1>
+{% if results|length == 0 %}
+No results.
+{% else %}
+<table>
+    <tbody>
+        <script>
+            var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
+        </script>
+        {% for result in results %}
+        <tr>
+            <td>
+                <a href="/wiki/{{ result[0] }}" id="result_{{ result[0] }}">{{ result[0] }}</a>
+            </td>
+        </tr>
+        <script>
+            client.database.call('get_content', [wiki_user, '{{ result[0] }}']).then(result => {
+                document.getElementById('result_{{ result[0] }}').innerHTML = result.title;
+            });
+        </script>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+{% endblock %}

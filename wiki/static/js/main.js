@@ -23,32 +23,6 @@ const version_number = '0.4.6';
     }
 }());
 
-function latexPlugin() {
-    const toHTMLRenderers = {
-        latex(node) {
-            const generator = new latexjs.HtmlGenerator({ hyphenate: false });
-            var body = latexjs.parse(node.literal, { generator: generator }).domFragment();
-
-            // remove annotations and .katex-html
-            const remove = body.querySelectorAll("annotation, .katex-html");
-            remove.forEach(function(element){
-                element.parentNode.removeChild(element);
-            });
-            var div = document.createElement('div');
-            div.appendChild(body.cloneNode(true));
-            body = div.innerHTML;
-            
-            return [
-                { type: 'openTag', tagName: 'div', outerNewLine: true },
-                { type: 'html', content: body },
-                { type: 'closeTag', tagName: 'div', outerNewLine: true }
-            ];
-        },
-    }
-
-    return { toHTMLRenderers }
-}
-
 function formatPostLink(permlink) {
     split = permlink.split("-")
     if(split.length > 1) {
@@ -78,3 +52,14 @@ function formatPostLinkSegment(val) {
     }
     return val;
 }
+
+document.getElementById('submitSearch').addEventListener('click', function(){
+    search = encodeURIComponent(document.getElementById('searchInput').value);
+    window.location.replace("/search/"+search);
+});
+
+document.getElementById('searchInput').addEventListener('keyup', function(e) {
+    if (e.key === 'Enter') {
+        document.getElementById('submitSearch').click();
+    }
+});
