@@ -100,39 +100,40 @@ def pages(page):
     return render_template(page+'.html',notabs=True)
 
 @bp.route('/create')
-@bp.route('/create/<article_title>')
-def create(article_title = ''):
-    if(article_title[:1].islower()):
-        return redirect('/create/'+article_title[:1].upper()+article_title[1:])
+@bp.route('/create/<article>')
+def create(article = ''):
+    article_f = formatPostLink(article)
+    if(article_f != article):
+        return redirect('/edit/'+article_f)
     
-    if 'username' in session.keys():
-        if(session['userlevel'] < 1):
-            return redirect('/insufficient_permissions')
-        return render_template('edit.html',article_title=article_title,notabs=True)
-    else:
-        return redirect('/login/create')    
+    if('username' not in session.keys() or session['userlevel'] < 1):
+        return redirect('/insufficient_permissions')
+    return render_template('edit.html',article_title=article.replace('-',' '),notabs=True)
     
 @bp.route('/insufficient_permissions')
 def insufficient_permissions():
     return render_template('insufficient_permissions.html',notabs=True)
 
-@bp.route('/edit/<article_title>')
-def edit(article_title):
-    if('username' in session.keys() and session['userlevel'] < 1):
+@bp.route('/edit/<article>')
+def edit(article):
+    if('username' not in session.keys() or session['userlevel'] < 1):
         return redirect('/insufficient_permissions')
-    if(article_title[:1].islower()):
-        return redirect('/edit/'+article_title[:1].upper()+article_title[1:])
+    
+    article_f = formatPostLink(article)
+    if(article_f != article):
+        return redirect('/edit/'+article_f)  
+    permlink = unformatPostLink(article_f)
     
     if 'username' in session.keys():
         try:
-            post = Comment(current_app.config['WIKI_USER']+"/"+unformatPostLink(article_title))
+            post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
             body = Markup(xssEscape(restoreSource(post.body)))
             return render_template('edit.html',post=post,body=body,article_title=post.title)
     
         except:
-            return redirect('/create/'+article_title)
+            return redirect('/create/'+article_f)
     else:
-        return redirect('/login/edit/'+article_title)
+        return redirect('/login/edit/'+article_f)
 
 def formatPostLink(hive_post):
     split = hive_post.split("-")
