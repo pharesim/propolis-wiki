@@ -128,6 +128,7 @@ def edit(article):
         try:
             post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
             body = Markup(xssEscape(restoreSource(post.body)))
+            post.json_metadata['tags'].remove('wiki')
             return render_template('edit.html',post=post,body=body,article_title=post.title)
     
         except:
