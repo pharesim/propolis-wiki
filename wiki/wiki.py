@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, flash, redirect, render_template, session, current_app
+    Blueprint, Response, flash, redirect, render_template, session, current_app
 )
 from werkzeug.exceptions import abort
 
@@ -290,7 +290,7 @@ def toHtmlId(string):
 
 def getRevisionBody(permlink,trx_id):
     dmp = diff_match_patch()
-    last_edit = db_get_all('SELECT trx_id, timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1;',(permlink,))[0]
+    last_edit = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1;',(permlink,))[0]
     hive = Blockchain()
     patch = []
     if(last_edit[0] == trx_id):
@@ -363,7 +363,7 @@ def activity():
     edits = []
     for i, edit in enumerate(data):
         try:
-            before = db_get_all('SELECT trx_id, permlink FROM comments WHERE permlink = %s AND timestamp<%s ORDER BY timestamp DESC LIMIT 1;',(edit[2],edit[1],))[0]
+            before = db_get_all('SELECT trx_id FROM comments WHERE permlink = %s AND timestamp<%s ORDER BY timestamp DESC LIMIT 1;',(edit[2],edit[1],))[0]
             edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3],before[0]])
         except:
             edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3],''])
@@ -572,6 +572,32 @@ def setup():
         log = log + 'Account has permissions set, skipping.<br />'
 
     return redirect('/')
+
+@bp.route('/robots.txt')
+def robots_txt():
+    text = "# advertising-related bots:\n"
+    text += "User-agent: Mediapartners-Google*\n"
+    text += "Disallow: /\n"
+    text += "\n"
+    text += "User-agent: *\n"
+    text += "Allow: /wiki/\n"
+    text += "\n"
+    text += "Sitemap: "+current_app.config['WIKI_URL']+"/sitemap.xml"
+    return Response(text, mimetype='text/text')
+
+@bp.route('/sitemap.xml')
+def sitemap_xml():
+    wiki_pages = db_get_all('SELECT permlink FROM posts')
+    xml = '<?xml version="1.0" encoding="UTF-8"?>'+"\n"
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+"\n"
+    for page in wiki_pages:
+        last_edit = db_get_all('SELECT timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(page[0],))[0][0]
+        xml += "    <url>\n"
+        xml += "        <loc>"+current_app.config['WIKI_URL']+"/wiki/"+formatPostLink(page[0])+"</loc>"
+        xml += "        <lastmod>"+last_edit.strftime("%Y-%m-%d")+"</lastmod>"
+        xml += "    </url>"
+    xml += "</urlset>"
+    return Response(xml, mimetype='text/xml')
 
 if __name__ == '__main__':
     bp.run(debug=True)

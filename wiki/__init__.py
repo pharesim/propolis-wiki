@@ -19,6 +19,7 @@ def create_app():
         SESSION_TYPE='redis',
         SESSION_REDIS='redis://127.0.0.1:6379',
         SESSION_USE_SIGNER=True,
+        WIKI_URL='https://propol.is',
         START_PAGE='welcome-to-propolis-wiki'
     )
 
