@@ -81,7 +81,7 @@ function checkExists(permlink) {
     enableSubmit();
 }
 
-function patchBody(permlink,newBody,t,reason) {
+function patchBody(permlink,newBody,title,topics,reason) {
     client.database.call('get_content', [wiki_user, permlink]).then(result => {
         var dmp = new diff_match_patch();
         var diff = dmp.diff_main(result.body, newBody);
@@ -93,11 +93,11 @@ function patchBody(permlink,newBody,t,reason) {
         } else {
             new_body = newBody;
         }
-        broadcastEdit(result.title, new_body, permlink, t, reason);
+        broadcastEdit(title, new_body, permlink, topics, reason);
     });
 }
 
-function broadcastEdit(title,body,permlink,t,reason) {
+function broadcastEdit(title,body,permlink,topics,reason) {
     const keychain = window.hive_keychain;
     keychain.requestBroadcast(
         wiki_user,
@@ -110,7 +110,7 @@ function broadcastEdit(title,body,permlink,t,reason) {
                 parent_author: '',
                 parent_permlink: 'wiki',
                 permlink: permlink,
-                json_metadata: "{\"tags\": "+t+",\"format\": \"markdown+html\",\"app\": \""+wiki_user+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\", \"reason\": \""+reason+"\"}}"
+                json_metadata: "{\"tags\": "+topics+",\"format\": \"markdown+html\",\"app\": \""+wiki_user+"/"+version_number+"\",\"appdata\": {\"user\": \""+username+"\", \"reason\": \""+reason+"\"}}"
             }
         ]],
         'Posting',
@@ -149,14 +149,15 @@ btn.addEventListener('click', function() {
     });
     t = t.replace(/,+$/,'');
     t += "]";
+    topics = t;
 
     let reason = 'Initial post';
     let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
     if(where == 'edit') {
         let reason = document.getElementById('reason').value;
-        body = patchBody(permlink, body, t, reason);
+        body = patchBody(permlink, body, title, topics, reason);
     } else { 
-        broadcastEdit(title, body, permlink, t, reason);
+        broadcastEdit(title, body, permlink, topics, reason);
     }
 });
 
