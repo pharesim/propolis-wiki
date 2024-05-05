@@ -580,7 +580,8 @@ def robots_txt():
     text += "Disallow: /\n"
     text += "\n"
     text += "User-agent: *\n"
-    text += "Allow: /wiki/\n"
+    text += "Allow: /\n"
+    text += "Allow: /wiki/"
     text += "\n"
     text += "Sitemap: "+current_app.config['WIKI_URL']+"/sitemap.xml"
     return Response(text, mimetype='text/text')
