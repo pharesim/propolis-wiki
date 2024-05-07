@@ -150,12 +150,10 @@ def formatPostLink(hive_post):
 
 def formatPostLinkSegment(val):
     keeplow = ['Disambiguation','disambiguation']
-    if(val[:1].islower()):
-        if(val not in keeplow):
-            return val[:1].upper()+val[1:]
-    else:
-        if(val in keeplow):
-            return val[:1].lower()+val[1:]
+    if(val not in keeplow):
+        return val[:1].upper()+val[1:].lower()
+    if(val in keeplow):
+        return val.lower()
     return val
 
 def unformatPostLink(hive_post):
