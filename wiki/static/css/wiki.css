@@ -679,6 +679,15 @@ a[href^='http']::after {
 	margin-left: 0.25em;
 }
 
+a[href^='https://propol.is'] {
+	padding-right: 0;
+}
+
+a[href^='https://propol.is']::after {
+	content: none;
+	margin-left: 0;
+}
+
 p.message {
 	color: red;
 }
