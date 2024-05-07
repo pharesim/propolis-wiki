@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, Response, flash, redirect, render_template, session, current_app
+    Blueprint, Response, flash, redirect, render_template, request, session, current_app
 )
 from werkzeug.exceptions import abort
 
@@ -583,7 +583,7 @@ def robots_txt():
     text += "Allow: /\n"
     text += "Allow: /wiki/"
     text += "\n"
-    text += "Sitemap: "+current_app.config['WIKI_URL']+"/sitemap.xml"
+    text += "Sitemap: "+request.url_root+"sitemap.xml"
     return Response(text, mimetype='text/text')
 
 @bp.route('/sitemap.xml')
@@ -594,7 +594,7 @@ def sitemap_xml():
     for page in wiki_pages:
         last_edit = db_get_all('SELECT timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(page[0],))[0][0]
         xml += "    <url>\n"
-        xml += "        <loc>"+current_app.config['WIKI_URL']+"/wiki/"+formatPostLink(page[0])+"</loc>"
+        xml += "        <loc>"+request.url_root+"wiki/"+formatPostLink(page[0])+"</loc>"
         xml += "        <lastmod>"+last_edit.strftime("%Y-%m-%d")+"</lastmod>"
         xml += "    </url>"
     xml += "</urlset>"
