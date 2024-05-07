@@ -41,16 +41,11 @@ function formatPostLink(permlink) {
 
 function formatPostLinkSegment(val) {
     let keeplow = ['Disambiguation','disambiguation'];
-    if(val[1] == val[0].toLowerCase()) {
-        if(!keeplow.includes(val)) {
-            return val[0].toUpperCase()+val.substring(1,-1);
-        }
+    if(!keeplow.includes(val)) {
+        return val[0].toUpperCase()+val.substring(1);
     } else {
-        if(keeplow.includes(val)) {
-            return val[0].lower()+val.substring(1,-1);
-        }
+        return val[0].lower()+val.substring(1);
     }
-    return val;
 }
 
 document.getElementById('submitSearch').addEventListener('click', function(){

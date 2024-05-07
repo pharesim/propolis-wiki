@@ -149,6 +149,14 @@ def formatPostLink(hive_post):
     return hive_post
 
 def formatPostLinkSegment(val):
+    split = val.split(':')
+    if(len(split) > 1):
+        val = ''
+        for i, s in enumerate(split):
+            val += formatPostLinkSegment(s)
+            if(i+1 < len(split)):
+                val += ':'
+        return val
     keeplow = ['Disambiguation','disambiguation']
     if(val not in keeplow):
         return val[:1].upper()+val[1:].lower()

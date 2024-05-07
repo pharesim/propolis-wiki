@@ -29,7 +29,7 @@ This is a full list of edits on all articles
         <script>
             client.database.call('get_transaction', ['{{ edit[0] }}']).then(result => {
                 result = result['operations'][0][1];
-                document.getElementById('edit_{{ edit[0] }}_title').innerHTML = '<a href="/wiki/'+result.permlink.charAt(0).toUpperCase() + result.permlink.slice(1)+'">'+result.title+'</a>';
+                document.getElementById('edit_{{ edit[0] }}_title').innerHTML = '<a href="/wiki/'+formatPostLink(result.permlink)+'">'+result.title+'</a>';
                 let metadata = JSON.parse(result.json_metadata);
                 let user = metadata['appdata']['user'];
                 document.getElementById('edit_{{ edit[0] }}_user').innerHTML = '<a href="https://hive.blog/@'+user+'">'+user+'</a>';
