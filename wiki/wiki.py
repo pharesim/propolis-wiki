@@ -97,7 +97,7 @@ def redirect_home():
 
 @bp.route('/pages/<page>')
 def pages(page):
-    return render_template(page+'.html',notabs=True)
+    return render_template(page+'.html',notabs=True,pagetitle=page.capitalize())
 
 @bp.route('/create')
 @bp.route('/create/<article>')
@@ -108,11 +108,11 @@ def create(article = ''):
     
     if('username' not in session.keys() or session['userlevel'] < 1):
         return redirect('/insufficient_permissions')
-    return render_template('edit.html',article_title=article.replace('-',' '),notabs=True)
+    return render_template('edit.html',article_title=article.replace('-',' '),notabs=True,pagetitle='Create article')
     
 @bp.route('/insufficient_permissions')
 def insufficient_permissions():
-    return render_template('insufficient_permissions.html',notabs=True)
+    return render_template('insufficient_permissions.html',notabs=True,pagetitle='Insufficient permissions')
 
 @bp.route('/edit/<article>')
 def edit(article):
@@ -129,7 +129,7 @@ def edit(article):
             post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
             body = Markup(xssEscape(restoreSource(post.body)))
             post.json_metadata['tags'].remove('wiki')
-            return render_template('edit.html',post=post,body=body,article_title=post.title)
+            return render_template('edit.html',post=post,body=body,article_title=post.title,pagetitle='Edit article')
     
         except:
             return redirect('/create/'+article_f)
@@ -159,7 +159,7 @@ def formatPostLinkSegment(val):
         return val
     keeplow = ['Disambiguation','disambiguation']
     if(val not in keeplow):
-        return val[:1].upper()+val[1:].lower()
+        return val.capizalize()
     if(val in keeplow):
         return val.lower()
     return val
@@ -355,7 +355,7 @@ def source(article):
     permlink = unformatPostLink(article_f)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
-        return render_template('source.html',post=post,body=restoreSource(post.body))
+        return render_template('source.html',post=post,body=restoreSource(post.body),pagetitle='View source')
     
     except:
         return redirect('/create/'+article_f)
@@ -375,7 +375,7 @@ def activity():
             edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3],before[0]])
         except:
             edits.append([edit[0],edit[1],formatPostLink(edit[2]),edit[3],''])
-    return render_template('activity.html',edits=edits,notabs=True)
+    return render_template('activity.html',edits=edits,notabs=True,pagetitle='Activity')
 
 @bp.route('/history/<article>')
 def history(article):
@@ -390,7 +390,7 @@ def history(article):
         return redirect('/create/'+article_f)
         
     edits = db_get_all('SELECT trx_id, timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC',(permlink,))
-    return render_template('history.html',post=post,permlink=article_f,edits=edits)
+    return render_template('history.html',post=post,permlink=article_f,edits=edits,pagetitle='Article history')
 
 @bp.route('/revision/<trx_id>')
 def revision_raw(trx_id):
@@ -420,7 +420,7 @@ def revision(article, trx_id):
     except:
         older_revision = ''
     newer_revision = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s AND timestamp > %s ORDER BY timestamp ASC LIMIT 1',(permlink,last_update[0]))[0][0]
-    return render_template('wiki.html',post=post,body=body,last_update=last_update,revision=trx_id,permlink=article_f,latest_update=latest_update,latest_revision=latest_revision,older_revision=older_revision,newer_revision=newer_revision)
+    return render_template('wiki.html',pagetitle='Revision',post=post,body=body,last_update=last_update,revision=trx_id,permlink=article_f,latest_update=latest_update,latest_revision=latest_revision,older_revision=older_revision,newer_revision=newer_revision)
 
 @bp.route('/history/<article>/compare/<revision_1>/<revision_2>')
 def compare(article, revision_1, revision_2):
@@ -436,7 +436,7 @@ def compare(article, revision_1, revision_2):
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
     except:
         return redirect('/create/'+article_f)
-    return render_template('compare.html',post=post,permlink=formatPostLink(permlink),body_1=body_1,body_2=body_2,data_1=data_1,data_2=data_2)
+    return render_template('compare.html',pagetitle='Compare revisions',post=post,permlink=formatPostLink(permlink),body_1=body_1,body_2=body_2,data_1=data_1,data_2=data_2)
     
 @bp.route('/talk/<article>')
 def talk(article):
@@ -448,7 +448,7 @@ def talk(article):
             'short': Markup(xssEscape('<p id="short_'+d.permlink+'">'+d.body[0:55]+'...</p>'))
         }
         replies.append(re)
-    return render_template('talk.html',data=data,replies=replies)
+    return render_template('talk.html',data=data,replies=replies,pagetitle='Talk')
 
 
 @bp.route('/wiki/Categories:Overview')
@@ -456,12 +456,12 @@ def categories():
     categories = db_get_all('SELECT category FROM categories ORDER BY category;')
     for i, category in enumerate(categories):
         categories[i] = (categories[i][0],db_count('SELECT count(category) FROM categories_posts WHERE category=%s;',(category[0],)))
-    return render_template('categories.html', categories=categories,notabs=True)
+    return render_template('categories.html', categories=categories,notabs=True,pagetitle='Categories')
 
 @bp.route('/wiki/Category:<category>')
 def category(category):
     posts = db_get_all('SELECT permlink FROM categories_posts WHERE category=%s;',(category.lower(),))
-    return render_template('category.html', category=category,posts=posts,notabs=True)
+    return render_template('category.html', category=category,posts=posts,notabs=True,pagetitle=category.capitalize())
 
 @bp.route('/random')
 def random_article():
@@ -483,7 +483,7 @@ def contributions():
     edits = []
     for i, edit in enumerate(data):
         edits.append([edit[0],edit[1],formatPostLink(edit[2])])
-    return render_template('contributions.html',edits=edits,notabs=True)
+    return render_template('contributions.html',edits=edits,notabs=True,pagetitle='My contributions')
 
 @bp.route('/admin')
 def admin():
@@ -495,7 +495,7 @@ def admin_users():
         return redirect('/')
     
     account = Account(current_app.config['WIKI_USER'])
-    return render_template('admin/users.html',notabs=True,auths=account["posting"]["account_auths"])
+    return render_template('admin/users.html',notabs=True,auths=account["posting"]["account_auths"],pagetitle='User management')
 
 @bp.route('/admin/user/add/<username>/<int:userlevel>')
 def admin_user_add(username, userlevel):
@@ -567,17 +567,16 @@ def admin_user_delete(username):
 
 @bp.route('/setup')
 def setup():
-    log = ''
     account = Account(current_app.config['WIKI_USER'])
     if(account["posting"]["account_auths"] == []):
         if(session['username']):
             account["posting"]["account_auths"] = [[session['username'],3]]
             hive_account_update(account)
-            log = log + 'Created admin account '+session['username']+'<br />'
+            flash('Created admin account '+session['username'])
         else:
-            log = log + 'No admin set, but not logged in. <a href="/login/setup">Log in</a> and try again<br />'
+            flash('No admin set, but not logged in. <a href="/login/setup">Log in</a> and try again')
     else:
-        log = log + 'Account has permissions set, skipping.<br />'
+        flash('Account has permissions set, skipping')
 
     return redirect('/')
 
