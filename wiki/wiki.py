@@ -159,7 +159,7 @@ def formatPostLinkSegment(val):
         return val
     keeplow = ['Disambiguation','disambiguation']
     if(val not in keeplow):
-        return val.capizalize()
+        return val.capitalize()
     if(val in keeplow):
         return val.lower()
     return val
