@@ -106,7 +106,7 @@ while 1 == 1:
                 ' ON CONFLICT(trx_id) DO NOTHING',
                 (op['trx_id'],op['permlink'],op['timestamp'],metadata['appdata']['user']))
             for tag in tags:
-                if(tag != 'wiki'):
+                if(tag != 'wiki' and tag != ''):
                     cur.execute('INSERT INTO categories (category)'
                         ' VALUES (%s)'
                         ' ON CONFLICT(category) DO NOTHING',
