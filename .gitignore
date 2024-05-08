@@ -1,4 +1,5 @@
 config.py
+__pycache__
 wiki/hive_keychain_auth/__pycache__/
 wiki/__pycache__/
 build/
