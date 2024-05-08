@@ -95,7 +95,11 @@ while 1 == 1:
             if 'appdata' not in metadata or 'user' not in metadata['appdata']:
                 metadata['appdata']['user'] = None
 
-            webhook_send('New edit by '+metadata['appdata']['user']+': '+op['title']+' https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id'])
+            webhook_text = 'New edit by '+metadata['appdata']['user']+' on article '+op['title']
+            if 'reason' in metadata['appdata']:
+                webhook_text += ' ('+metadata['appdata']['reason']+')'
+            webhook_text += ' https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
+            webhook_send(webhook_text)
 
             transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
             signer = ''
