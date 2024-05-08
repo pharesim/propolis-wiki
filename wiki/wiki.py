@@ -136,33 +136,33 @@ def edit(article):
     else:
         return redirect('/login/edit/'+article_f)
 
-def formatPostLink(hive_post):
-    split = hive_post.split("-")
+def formatPostLink(permlink):
+    split = permlink.split("-")
     if(len(split) > 1):
-        hive_post = ''
+        permlink = ''
         for i, val in enumerate(split):
-            hive_post += formatPostLinkSegment(val)
+            permlink += formatPostLinkSegment(val)
             if(i+1 < len(split)):
-                hive_post += '-'
+                permlink += '-'
     else:
-        hive_post = formatPostLinkSegment(hive_post)
-    return hive_post
+        permlink = formatPostLinkSegment(permlink)
+    return permlink
 
-def formatPostLinkSegment(val):
-    split = val.split(':')
+def formatPostLinkSegment(segment):
+    split = segment.split(':')
     if(len(split) > 1):
-        val = ''
+        segment = ''
         for i, s in enumerate(split):
-            val += formatPostLinkSegment(s)
+            segment += formatPostLinkSegment(s)
             if(i+1 < len(split)):
-                val += ':'
-        return val
+                segment += ':'
+        return segment
     keeplow = ['Disambiguation','disambiguation']
-    if(val not in keeplow):
-        return val.capitalize()
-    if(val in keeplow):
-        return val.lower()
-    return val
+    if(segment not in keeplow):
+        return segment.capitalize()
+    if(segment in keeplow):
+        return segment.lower()
+    return segment
 
 def unformatPostLink(hive_post):
     split = hive_post.split("-")

@@ -37,6 +37,34 @@ acc = Account(conf['WIKI_USER'])
 hive = Blockchain()
 w = Wallet()
 
+def formatPostLink(permlink):
+    split = permlink.split("-")
+    if(len(split) > 1):
+        permlink = ''
+        for i, val in enumerate(split):
+            permlink += formatPostLinkSegment(val)
+            if(i+1 < len(split)):
+                permlink += '-'
+    else:
+        permlink = formatPostLinkSegment(permlink)
+    return permlink
+
+def formatPostLinkSegment(segment):
+    split = segment.split(':')
+    if(len(split) > 1):
+        segment = ''
+        for i, s in enumerate(split):
+            segment += formatPostLinkSegment(s)
+            if(i+1 < len(split)):
+                segment += ':'
+        return segment
+    keeplow = ['Disambiguation','disambiguation']
+    if(segment not in keeplow):
+        return segment.capitalize()
+    if(segment in keeplow):
+        return segment.lower()
+    return segment
+
 def webhook_send(text):
     url = conf['DISCORD_WEBHOOK']
     data = {}
@@ -63,11 +91,11 @@ while 1 == 1:
         if(exists == False and op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
             pprint('Processing transaction '+op['trx_id'])
 
-            webhook_send('New edit: '+op['title']+' https://propol.is/history/'+op['permlink']+'/revision/'+op['trx_id'])
-
             metadata = json.loads(op['json_metadata'])
             if 'appdata' not in metadata or 'user' not in metadata['appdata']:
                 metadata['appdata']['user'] = None
+
+            webhook_send('New edit by '+metadata['appdata']['user']+': '+op['title']+' https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id'])
 
             transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
             signer = ''
