@@ -11,6 +11,7 @@ from beemgraphenebase.base58 import Base58
 from pprint import pprint
 import time
 import json
+import requests
 
 from configparser import ConfigParser
 from itertools import chain
@@ -36,6 +37,14 @@ acc = Account(conf['WIKI_USER'])
 hive = Blockchain()
 w = Wallet()
 
+def webhook_send(text):
+    url = conf['DISCORD_WEBHOOK']
+    data = {}
+    data["content"] = text
+    data["username"] = conf['WIKI_USER']+" activity"
+
+    return requests.post(url, json=data, headers={"Content-Type": "application/json"})
+
 # start from block after wiki user account creation
 startblock = 0
 for op in acc.history(use_block_num=False,start=0,stop=1):
@@ -53,6 +62,8 @@ while 1 == 1:
         # Only process comments that don't exist yet, were authored by the wiki user in the category wiki
         if(exists == False and op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
             pprint('Processing transaction '+op['trx_id'])
+
+            webhook_send('New edit: '+op['title']+' https://propol.is/history/'+op['permlink']+'/revision/'+op['trx_id'])
 
             metadata = json.loads(op['json_metadata'])
             if 'appdata' not in metadata or 'user' not in metadata['appdata']:
@@ -73,6 +84,7 @@ while 1 == 1:
                 s = False
             if(s == False):
                 pprint("User in metadata isn't signer. Removing signer's access.")
+                webhook_send("User in metadata didn't sign the transaction. Removing authorization for "+signer)
                 account = Account(conf['WIKI_USER'])
                 for i, auth in enumerate(account["posting"]["account_auths"]):
                     if(auth[0] == signer):
