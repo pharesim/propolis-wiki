@@ -1,8 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<script src="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.js"></script>
+<script src="{{ url_for('static', filename='js/tui-editor-plugin-reference.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+<link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.css" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/tui-editor-plugin-reference.css') }}" />
+
 <script src="{{ url_for('static', filename='js/talk.js') }}"></script>
-<h1>Talk</h1>
+
+<h1>Talk about {{ post.title }}</h1>
+
+<p class="roleNote">
+This page is still under construction. Use another hive interface (i.e.
+<a href="https://hive.blog/@{{ config['WIKI_USER'] }}/{{ permlink }}">hive.blog</a>) to write a comment.
+</p>
+
+{% if data|length == 0 %}
+<p>There is no discussion yet.</p>
+{% endif %}
+
+<div id="comments">
+
 {% for reply in data %}
 <div class="comment">
     <div id="header_{{ reply.permlink }}">
@@ -10,23 +31,30 @@
         <h3>{{ reply.title }}</h3>
         <div id="short_{{ reply.permlink }}">{{ replies[loop.index0].short }}</div>
     </div>
-    <button id="collapse_{{ reply.permlink }}" title="collapse"><i class="fas fa-chevron-up"></i></button>
     <div id="body_{{ reply.permlink }}">
-        {{ replies[loop.index0].body }}
-        <div>
-            <a href="#" id="reply_link_{{ reply.permlink }}">Reply</a>
-            <div id="reply_{{ reply.permlink }}" class="reply_form">
-                <h3>Your reply</h3>
-                <div>
-                    <input type="text" id="reply_title_{{ reply. permlink }}" placeholder="Reply title" />
-                    <button id="reply_collapse_{{ reply.permlink }}" title="collapse"><i class="fas fa-chevron-up"></i></button>
-                </div>
-                <textarea id="reply_text_{{ reply.permlink }}" placeholder="Reply text" rows="10" cols="80"></textarea>
-                <div class="right"><button id="reply_send_{{ reply.permlink }}">Send</button></div>
+        <div id="body_{{ reply.permlink }}_content">{{ replies[loop.index0].body }}</div>
+        <a href="#" id="reply_link_{{ reply.permlink }}" title="reply">Reply</a>
+        <a href="#" id="collapse_{{ reply.permlink }}" title="collapse">Collapse</a>
+        <br />
+        <div id="reply_{{ reply.permlink }}" class="reply_form">
+            <h3>Your reply</h3>
+            <div>
+                <input type="text" id="reply_title_{{ reply. permlink }}" placeholder="Reply title" />
+            </div>
+            <textarea id="reply_text_{{ reply.permlink }}" placeholder="Reply text" rows="10" cols="80"></textarea>
+            <div class="right">
+                <button id="reply_collapse_{{ reply.permlink }}" title="collapse"><i class="fas fa-chevron-up"></i></button>
+                <button id="reply_send_{{ reply.permlink }}">Send</button>
             </div>
         </div>
     </div>
-    <script>applyListeners('{{ reply.permlink }}');</script>
+    <script>
+        createViewer('body_{{ reply.permlink }}_content');
+        applyListeners('{{ reply.permlink }}');
+    </script>
 </div>
 {% endfor %}
+
+</div>
+<script>reverseChildren(document.getElementById('comments'));</script>
 {% endblock %}

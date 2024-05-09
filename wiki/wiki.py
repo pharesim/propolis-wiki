@@ -47,10 +47,11 @@ def db_count(query,data = ()):
 def xssEscape(string):
     string = bleach.clean(
         string,
-        tags = {'a','br','b','center','div','h4','i','li','p','ref','span','sub','sup','table','tbody','td','thead','th','tr','ul'},
+        tags = {'a','br','b','center','div','h4','i','img','li','p','ref','span','sub','sup','table','tbody','td','thead','th','tr','ul'},
         attributes = {
             'a': ['class', 'href', 'id', 'title'],
             'div': ['class'],
+            'img': ['src'],
             'p': ['class','id'],
             'span': ['class','id','title'],
             'td': ['colspan'],
@@ -426,7 +427,7 @@ def revision(article, trx_id):
 def compare(article, revision_1, revision_2):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/compare/'+article_f+'/'+revision_1+'/'+revision_2)   
+        return redirect('/history/'+article_f+'/compare/'+revision_1+'/'+revision_2)   
     permlink = unformatPostLink(article)
     body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
     body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
@@ -440,15 +441,23 @@ def compare(article, revision_1, revision_2):
     
 @bp.route('/talk/<article>')
 def talk(article):
-    data = Comment(current_app.config['WIKI_USER']+'/'+unformatPostLink(article)).get_all_replies()
-    replies = []
-    for d in data:
-        re = {
-            'body': Markup(xssEscape('<p id="body_'+d.permlink+'">'+d.body+'</p>')),
-            'short': Markup(xssEscape('<p id="short_'+d.permlink+'">'+d.body[0:55]+'...</p>'))
-        }
-        replies.append(re)
-    return render_template('talk.html',data=data,replies=replies,pagetitle='Talk')
+    article_f = formatPostLink(article)
+    if(article_f != article):
+        return redirect('/talk/'+article_f)   
+    permlink = unformatPostLink(article)
+
+    try:
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        data = Comment(current_app.config['WIKI_USER']+'/'+permlink).get_all_replies()
+        replies = []
+        for d in data:
+            replies.append({
+                'body': Markup(xssEscape(d.body)),
+                'short': Markup(xssEscape(d.body[0:55]+'...'))
+            })
+        return render_template('talk.html',permlink=permlink,post=post,data=data,replies=replies,pagetitle='Talk')
+    except:
+        return redirect('/create/'+article_f)
 
 
 @bp.route('/wiki/Categories:Overview')
