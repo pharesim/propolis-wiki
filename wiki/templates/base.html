@@ -34,20 +34,20 @@
 				<div class="navigation">
 					<ul>
 						<li><a href="/">Main page</a></li>
-						<li><a href="/wiki/Categories:Overview">Categories</a></li>
-						<li><a href="/random">Random article</a></li>						
+						<li><a href="{{ url_for('wiki.categories') }}">Categories</a></li>
+						<li><a href="{{ url_for('wiki.random_article') }}">Random article</a></li>						
 					</ul>
 					<h3>Interaction</h3>
 					<ul>
-						<li><a href="/activity">Activity</a></li>
-						<li><a href="/pages/help">Help</a></li>
-						<li><a href="/pages/about">About</a></li>
+						<li><a href="{{ url_for('wiki.activity') }}">Activity</a></li>
+						<li><a href="{{ url_for('wiki.pages', page='help') }}">Help</a></li>
+						<li><a href="{{ url_for('wiki.pages', page='about') }}">About</a></li>
 					</ul>
 					{% if session.username is defined and session.userlevel > 1 %}
 					<h3>Administration</h3>
 					<ul>
-						<li><a href="/admin">Dashboard</a></li>
-						<li><a href="/admin/users">Users</a></li>
+						<li><a href="{{ url_for('wiki.admin') }}">Dashboard</a></li>
+						<li><a href="{{ url_for('wiki.admin_users') }}">Users</a></li>
 					</ul>
 					{% endif %}
 				</div>
@@ -70,10 +70,10 @@
 						{% set path = request.path %}
 					{% endif %}
                     {% else %} 
-                    <a href="/create">Create</a>
-                    <a href="/contributions">Contributions</a> 
+                    <a href="{{ url_for('wiki.create') }}">Create</a>
+                    <a href="{{ url_for('wiki.contributions') }}">Contributions</a> 
                     <!-- <a href="#">Talk</a> -->
-                    <a href="/logout">Logout</a>
+                    <a href="{{ url_for('wiki.hive_keychain_auth.logout') }}">Logout</a>
                     {% endif %}
 				</div>
 				<div class="tabs clearfix">
@@ -81,8 +81,8 @@
 					<div class="tabsLeft">
 						<ul>
 							{% if notabs is not defined %}
-							<li><a href="/wiki/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'wiki' or request.path.split('/')[1] == 'source' or request.path.split('/')[1] == 'edit' or request.path.split('/')[1] == 'history' %}active{% endif %}">Article</a></li>
-							<li><a href="/talk/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'talk' %}active{% endif %}">Talk</a></li>
+							<li><a href="{{ url_for('wiki.wiki', article=request.path.split('/')[2]) }}" class="{% if request.path.split('/')[1] == 'wiki' or request.path.split('/')[1] == 'source' or request.path.split('/')[1] == 'edit' or request.path.split('/')[1] == 'history' %}active{% endif %}">Article</a></li>
+							<li><a href="{{ url_for('wiki.talk', article=request.path.split('/')[2]) }}" class="{% if request.path.split('/')[1] == 'talk' %}active{% endif %}">Talk</a></li>
 							{% else %}
 							<li><a href="{{ request.path }}" class="active">{{ request.path[1:].capitalize() }}</a></li>
 							{% endif %}					
@@ -96,12 +96,12 @@
 					{% if notabs is not defined %}
 					<div class="tabsRight">
 						<ul>
-							<li><a href="/wiki/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'wiki' %}active{% endif %}">Read</a></li>
-							<li><a href="/source/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'source' %}active{% endif %}">View source</a></li>						
+							<li><a href="{{ url_for('wiki.wiki', article=request.path.split('/')[2]) }}" class="{% if request.path.split('/')[1] == 'wiki' %}active{% endif %}">Read</a></li>
+							<li><a href="{{ url_for('wiki.source', article=request.path.split('/')[2]) }}" class="{% if request.path.split('/')[1] == 'source' %}active{% endif %}">View source</a></li>						
 							{% if session.username is defined %}
-							<li><a href="/edit/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'edit' %}active{% endif %}">Edit</a></li>
+							<li><a href="{{ url_for('wiki.edit', article=request.path.split('/')[2]) }}" class="{% if request.path.split('/')[1] == 'edit' %}active{% endif %}">Edit</a></li>
 							{% endif %}
-							<li><a href="/history/{{ request.path.split('/')[2] }}" class="{% if request.path.split('/')[1] == 'history' %}active{% endif %}">View history</a></li>						
+							<li><a href="{{ url_for('wiki.history', article=request.path.split('/')[2]) }}" class="{% if request.path.split('/')[1] == 'history' %}active{% endif %}">View history</a></li>						
 						</ul>
 					</div>
 					{% endif %}
@@ -126,7 +126,7 @@
 					{% endif %}
 					{% endblock %}
 					<div class="footerlinks">
-						<a href="/pages/privacy">Privacy Policy</a> <a href="/pages/about">About</a> <a href="/pages/terms-and-conditions">Terms and Conditions</a> <a href="/pages/cookies">Cookie Statement</a> <a href="/pages/developers">Developers</a>
+						<a href="{{ url_for('wiki.pages', page='privacy') }}">Privacy Policy</a> <a href="/pages/about">About</a> <a href="/pages/terms-and-conditions">Terms and Conditions</a> <a href="/pages/cookies">Cookie Statement</a> <a href="/pages/developers">Developers</a>
 					</div>
 				</div>			
 			</div>		
