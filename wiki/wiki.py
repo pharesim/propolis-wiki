@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, Response, flash, redirect, render_template, request, session, current_app
+    Blueprint, Response, flash, redirect, render_template, url_for, request, session, current_app
 )
 from werkzeug.exceptions import abort
 
@@ -75,67 +75,6 @@ def hive_account_update(account_data):
             "memo_key": account_data["memo_key"],
             "json_metadata": account_data["json_metadata"]})
     return hive_broadcast(op)
-
-@bp.context_processor
-def inject_session_data():
-    return dict(session=session)
-
-@bp.before_request
-def before_request():
-    if 'username' not in session.keys():
-        session.pop('userlevel',None)
-    if 'username' in session.keys():
-        userlevel = 0
-        account = Account(current_app.config['WIKI_USER'])
-        for key in account["posting"]["account_auths"]:
-            if key[0] == session['username']:
-                userlevel = key[1]
-        session['userlevel'] = userlevel
-
-@bp.route('/wiki')
-def redirect_home():
-    return redirect('/')
-
-@bp.route('/pages/<page>')
-def pages(page):
-    return render_template(page+'.html',notabs=True,pagetitle=page.capitalize())
-
-@bp.route('/create')
-@bp.route('/create/<article>')
-def create(article = ''):
-    article_f = formatPostLink(article)
-    if(article_f != article):
-        return redirect('/edit/'+article_f)
-    
-    if('username' not in session.keys() or session['userlevel'] < 1):
-        return redirect('/insufficient_permissions')
-    return render_template('edit.html',article_title=article.replace('-',' '),notabs=True,pagetitle='Create article')
-    
-@bp.route('/insufficient_permissions')
-def insufficient_permissions():
-    return render_template('insufficient_permissions.html',notabs=True,pagetitle='Insufficient permissions')
-
-@bp.route('/edit/<article>')
-def edit(article):
-    if('username' not in session.keys() or session['userlevel'] < 1):
-        return redirect('/insufficient_permissions')
-    
-    article_f = formatPostLink(article)
-    if(article_f != article):
-        return redirect('/edit/'+article_f)  
-    permlink = unformatPostLink(article_f)
-    
-    if 'username' in session.keys():
-        try:
-            post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
-            body = Markup(xssEscape(restoreSource(post.body)))
-            post.json_metadata['tags'].remove('wiki')
-            return render_template('edit.html',post=post,body=body,article_title=post.title,pagetitle='Edit article')
-    
-        except:
-            return redirect('/create/'+article_f)
-    else:
-        return redirect('/login/edit/'+article_f)
 
 def formatPostLink(permlink):
     split = permlink.split("-")
@@ -321,6 +260,66 @@ def getRevisionBody(permlink,trx_id):
 def replaceLinebreaks(body):
     return body.replace("\n",'<br>')
 
+@bp.context_processor
+def inject_session_data():
+    return dict(session=session)
+
+@bp.before_request
+def before_request():
+    if 'username' not in session.keys():
+        session.pop('userlevel',None)
+    if 'username' in session.keys():
+        userlevel = 0
+        account = Account(current_app.config['WIKI_USER'])
+        for key in account["posting"]["account_auths"]:
+            if key[0] == session['username']:
+                userlevel = key[1]
+        session['userlevel'] = userlevel
+
+@bp.route('/wiki')
+def redirect_home():
+    return redirect('/')
+
+@bp.route('/pages/<page>')
+def pages(page):
+    return render_template(page+'.html',notabs=True,pagetitle=page.capitalize())
+
+@bp.route('/create')
+@bp.route('/create/<article>')
+def create(article = ''):
+    article_f = formatPostLink(article)
+    if 'username' not in session.keys():
+        return redirect(url_for('login',redirect_url='create/'+article_f))
+    if(session['userlevel'] < 1):
+        return redirect('/insufficient_permissions') 
+    if(article_f != article):
+        return redirect(url_for('create', article=article_f)) 
+    
+    return render_template('edit.html',article_title=article.replace('-',' '),notabs=True,pagetitle='Create article')
+    
+@bp.route('/insufficient_permissions')
+def insufficient_permissions():
+    return render_template('insufficient_permissions.html',notabs=True,pagetitle='Insufficient permissions')
+
+@bp.route('/edit/<article>')
+def edit(article):
+    article_f = formatPostLink(article)
+    if 'username' not in session.keys():
+        return redirect(url_for('login',redirect_url='edit/'+article_f))
+    if(session['userlevel'] < 1):
+        return redirect('/insufficient_permissions') 
+    if(article_f != article):
+        return redirect(url_for('edit', article=article_f)) 
+    permlink = unformatPostLink(article_f)
+        
+    try:
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        body = Markup(xssEscape(restoreSource(post.body)))
+        post.json_metadata['tags'].remove('wiki')
+        return render_template('edit.html',post=post,body=body,article_title=post.title,pagetitle='Edit article')
+    except:
+        return redirect(url_for('create', article=article_f))
+        
 @bp.route('/')
 @bp.route('/wiki/<article>')
 def wiki(article = ''):
@@ -328,8 +327,9 @@ def wiki(article = ''):
         article = current_app.config['START_PAGE']
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/wiki/'+article_f)  
+        return redirect(url_for('wiki', article=article_f))  
     permlink = unformatPostLink(article_f)
+
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
         last_update = [db_get_all('SELECT timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(permlink,))[0][0]]
@@ -341,10 +341,10 @@ def wiki(article = ''):
         post = {'title': article_f, 'body': 'Article not found. [Create](/create/'+article_f+') it now!'}
         return render_template('wiki.html',post=post,body=post['body'])
     
-@bp.route('/@<username>/<hive_post>')
-def reroute(username, hive_post):
+@bp.route('/@<username>/<permlink>')
+def reroute(username, permlink):
     if(username == current_app.config['WIKI_USER']):
-        return redirect('/wiki/'+hive_post)
+        return redirect(url_for('wiki', article=formatPostLink(permlink)))
     else:
         return redirect('/')
 
@@ -352,14 +352,13 @@ def reroute(username, hive_post):
 def source(article):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/source/'+article_f)   
+        return redirect(url_for('source', article=article_f))   
     permlink = unformatPostLink(article_f)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
-        return render_template('source.html',post=post,body=restoreSource(post.body),pagetitle='View source')
-    
+        return render_template('source.html',post=post,body=restoreSource(post.body),pagetitle='View source')   
     except:
-        return redirect('/create/'+article_f)
+        return redirect(url_for('create', article=article_f))
     
 @bp.route('/search/<search>')
 def search(search):
@@ -382,26 +381,25 @@ def activity():
 def history(article):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/history/'+article_f)
-    
+        return redirect(url_for('history', article=article_f))   
     permlink = unformatPostLink(article_f)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
     except:
-        return redirect('/create/'+article_f)
+        return redirect(url_for('create', article=article_f))
         
     edits = db_get_all('SELECT trx_id, timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC',(permlink,))
     return render_template('history.html',post=post,permlink=article_f,edits=edits,pagetitle='Article history')
 
 @bp.route('/revision/<trx_id>')
 def revision_raw(trx_id):
-    return redirect('/history/'+formatPostLink(db_get_all('SELECT permlink FROM comments WHERE trx_id=%s LIMIT 1;',(trx_id,))[0][0])+'/revision/'+trx_id)
+    return redirect(url_for('revision', article=formatPostLink(db_get_all('SELECT permlink FROM comments WHERE trx_id=%s LIMIT 1;',(trx_id,))[0][0]), trx_id=trx_id))
 
 @bp.route('/history/<article>/revision/<trx_id>')
 def revision(article, trx_id):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/history/'+article_f+'/revision/'+trx_id)
+        return redirect(url_for('revision', article=article_f, trx_id=trx_id))
     
     permlink = unformatPostLink(article_f)
     hive = Blockchain()
@@ -415,7 +413,7 @@ def revision(article, trx_id):
     latest_update = [latest[1],latest[2]]
     latest_revision = latest[0]
     if(latest_revision == trx_id):
-        return redirect('/wiki/'+article)
+        return redirect(url_for('wiki', article=article))
     try:
         older_revision = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s AND timestamp < %s ORDER BY timestamp DESC LIMIT 1',(permlink,last_update[0]))[0][0]
     except:
@@ -427,7 +425,7 @@ def revision(article, trx_id):
 def compare(article, revision_1, revision_2):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/history/'+article_f+'/compare/'+revision_1+'/'+revision_2)   
+        return redirect(url_for('compare', article=article_f, revision_1=revision_1, revision_2=revision_2))  
     permlink = unformatPostLink(article)
     body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
     body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
@@ -436,14 +434,14 @@ def compare(article, revision_1, revision_2):
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
     except:
-        return redirect('/create/'+article_f)
+        return redirect(url_for('create', article=article_f))
     return render_template('compare.html',pagetitle='Compare revisions',post=post,permlink=formatPostLink(permlink),body_1=body_1,body_2=body_2,data_1=data_1,data_2=data_2)
     
 @bp.route('/talk/<article>')
 def talk(article):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect('/talk/'+article_f)   
+        return redirect(url_for('talk', article=article_f))
     permlink = unformatPostLink(article)
 
     try:
@@ -457,7 +455,7 @@ def talk(article):
             })
         return render_template('talk.html',permlink=permlink,post=post,data=data,replies=replies,pagetitle='Talk')
     except:
-        return redirect('/create/'+article_f)
+        return redirect(url_for('create', article=article_f))
 
 
 @bp.route('/wiki/Categories:Overview')
@@ -488,12 +486,12 @@ def random_article():
     conn.close()
     import random
     rand = random.randint(0, len(permlinks)-1)
-    return redirect('/wiki/'+permlinks[rand][0])
+    return redirect(url_for('wiki', article=formatPostLink(permlinks[rand][0])))
 
 @bp.route('/contributions')
 def contributions():
     if('username' not in session):
-        return redirect('/login')
+        return redirect(url_for('login', redirect_url='contributions'))
     data = db_get_all('SELECT trx_id, timestamp, permlink FROM comments WHERE author=%s ORDER BY timestamp DESC;',(session['username'],))
     edits = []
     for i, edit in enumerate(data):
