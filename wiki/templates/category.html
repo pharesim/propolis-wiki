@@ -7,7 +7,7 @@ This is an alphabetical list of all articles in the category
 <h2>List of articles</h2>
 <ul>
     {% for post in posts %}
-    <li><a href="/wiki/{{ post[0] | capitalize }}">{{ post[0] | capitalize }}</a></li>
+    <li><a href="/wiki/{{ post['article'] }}">{{ post['title'] }}</a></li>
     {% endfor %}
 </ul>
 {% endblock %}

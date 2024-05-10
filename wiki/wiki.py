@@ -469,7 +469,13 @@ def categories():
 
 @bp.route('/wiki/Category:<category>')
 def category(category):
-    posts = db_get_all('SELECT permlink FROM categories_posts WHERE category=%s;',(category.lower(),))
+    data = db_get_all('SELECT permlink FROM categories_posts WHERE category=%s;',(category.lower(),))
+    posts = []
+    for i, post in enumerate(data):
+        posts.append({
+            'article': formatPostLink(post[0]),
+            'title': Comment(current_app.config['WIKI_USER']+"/"+post[0]).title
+        })
     return render_template('category.html', category=category,posts=posts,notabs=True,pagetitle=category.capitalize())
 
 @bp.route('/random')
