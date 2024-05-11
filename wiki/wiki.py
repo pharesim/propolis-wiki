@@ -227,10 +227,12 @@ def getRelated(new_body):
                         new_body += splitters[2]+title
     if len(related) > 0:
         for val in related:
-            string = '<span title="'+val[2]+'"'
+            string = '<span title="'+val[2]+'" class="'
             if(val[1] < 1):
-                string += ' class="article404"'
-            new_body = new_body.replace(val[0],string+'>'+val[0]+'</span>')
+                string += 'article404'
+            else:
+                string += 'articleExists'
+            new_body = new_body.replace(val[0],string+'">'+val[0]+'</span>')
     return related, new_body
     
 def toHtmlId(string):
