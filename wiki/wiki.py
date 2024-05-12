@@ -340,7 +340,10 @@ def wiki(article = ''):
         body = Markup(xssEscape(wikifyBody(post.body)))
         return render_template('wiki.html',post=post,body=body,last_update=last_update)  
     except:
-        post = {'title': article_f, 'body': 'Article not found. [Create](/create/'+article_f+') it now!'}
+        post = {
+            'title': article_f,
+            'body': "The community has yet to [write this article](/create/"+article_f+").\n\nThis is where you step in. Care to write what you know from a simple description or even a full, referenced wiki? Content will be community-fed and edited, you will be helping the cause and qualify for a weekly content reward.\n\n[Give it a try!](/create/"+article_f+")"
+        }
         return render_template('wiki.html',post=post,body=post['body'])
     
 @bp.route('/@<username>/<permlink>')
