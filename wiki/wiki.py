@@ -280,22 +280,22 @@ def before_request():
 
 @bp.route('/wiki')
 def redirect_home():
-    return redirect('/')
+    return redirect('/',301)
 
 @bp.route('/pages/<page>')
 def pages(page):
     return render_template(page+'.html',notabs=True,pagetitle=page.capitalize())
 
-@bp.route('/create')
+@bp.route('/create', defaults={'article':''})
 @bp.route('/create/<article>')
-def create(article = ''):
+def create(article):
     article_f = formatPostLink(article)
     if 'username' not in session.keys():
         return redirect(url_for('wiki.hive_keychain_auth.login',redirect_url='create/'+article_f))
     if(session['userlevel'] < 1):
         return redirect('/insufficient_permissions') 
     if(article_f != article):
-        return redirect(url_for('wiki.create', article=article_f)) 
+        return redirect(url_for('wiki.create', article=article_f),301) 
     
     return render_template('edit.html',article_title=article.replace('-',' '),notabs=True,pagetitle='Create article')
     
@@ -311,7 +311,7 @@ def edit(article):
     if(session['userlevel'] < 1):
         return redirect('/insufficient_permissions') 
     if(article_f != article):
-        return redirect(url_for('wiki.edit', article=article_f)) 
+        return redirect(url_for('wiki.edit', article=article_f),301) 
     permlink = unformatPostLink(article_f)
         
     try:
@@ -322,14 +322,14 @@ def edit(article):
     except:
         return redirect(url_for('wiki.create', article=article_f))
         
-@bp.route('/')
+@bp.route('/', defaults={'article':''})
 @bp.route('/wiki/<article>')
-def wiki(article = ''):
+def wiki(article):
     if(article == ''):
         article = current_app.config['START_PAGE']
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect(url_for('wiki.wiki', article=article_f))  
+        return redirect(url_for('wiki.wiki', article=article_f),301)  
     permlink = unformatPostLink(article_f)
 
     try:
@@ -349,15 +349,15 @@ def wiki(article = ''):
 @bp.route('/@<username>/<permlink>')
 def reroute(username, permlink):
     if(username == current_app.config['WIKI_USER']):
-        return redirect(url_for('wiki.wiki', article=formatPostLink(permlink)))
+        return redirect(url_for('wiki.wiki', article=formatPostLink(permlink)),301)
     else:
-        return redirect('/')
+        return redirect('/',301)
 
 @bp.route('/source/<article>')
 def source(article):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect(url_for('wiki.source', article=article_f))   
+        return redirect(url_for('wiki.source', article=article_f),301)   
     permlink = unformatPostLink(article_f)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
@@ -386,7 +386,7 @@ def activity():
 def history(article):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect(url_for('wiki.history', article=article_f))   
+        return redirect(url_for('wiki.history', article=article_f),301)   
     permlink = unformatPostLink(article_f)
     try:
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
@@ -398,13 +398,13 @@ def history(article):
 
 @bp.route('/revision/<trx_id>')
 def revision_raw(trx_id):
-    return redirect(url_for('wiki.revision', article=formatPostLink(db_get_all('SELECT permlink FROM comments WHERE trx_id=%s LIMIT 1;',(trx_id,))[0][0]), trx_id=trx_id))
+    return redirect(url_for('wiki.revision', article=formatPostLink(db_get_all('SELECT permlink FROM comments WHERE trx_id=%s LIMIT 1;',(trx_id,))[0][0]), trx_id=trx_id),301)
 
 @bp.route('/history/<article>/revision/<trx_id>')
 def revision(article, trx_id):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect(url_for('wiki.revision', article=article_f, trx_id=trx_id))
+        return redirect(url_for('wiki.revision', article=article_f, trx_id=trx_id),301)
     
     permlink = unformatPostLink(article_f)
     hive = Blockchain()
@@ -430,7 +430,7 @@ def revision(article, trx_id):
 def compare(article, revision_1, revision_2):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect(url_for('wiki.compare', article=article_f, revision_1=revision_1, revision_2=revision_2))  
+        return redirect(url_for('wiki.compare', article=article_f, revision_1=revision_1, revision_2=revision_2),301)  
     permlink = unformatPostLink(article)
     body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
     body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
@@ -446,7 +446,7 @@ def compare(article, revision_1, revision_2):
 def talk(article):
     article_f = formatPostLink(article)
     if(article_f != article):
-        return redirect(url_for('wiki.talk', article=article_f))
+        return redirect(url_for('wiki.talk', article=article_f),301)
     permlink = unformatPostLink(article)
 
     try:
