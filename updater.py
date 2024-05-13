@@ -133,7 +133,7 @@ while 1 == 1:
                         break
                 metadata['appdata']['user'] = None
             
-            time.sleep(3)
+            time.sleep(15)
             post = Comment(conf['WIKI_USER']+"/"+op['permlink'])           
             tags = metadata['tags']
             abstract = ''
