@@ -24,7 +24,7 @@ var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.c
 var btn = document.getElementById('submit');
 function enableSubmit() {
     btn.disabled = true;
-    if(title_input_error == 0 && topics_input_error == 0 && exists_error == 0) {
+    if(title_input_error == 0 && topics_input_error == 0 && reason_input_error == 0 && exists_error == 0) {
         btn.disabled = false;
     }
 }
@@ -63,6 +63,26 @@ function checkTitle() {
     checkExists(permlink); 
 }
 title_input.onkeyup = function() { checkTitle(); }; 
+
+// validate reason input
+var reason_input_error = 0;
+if(where == 'edit') {
+    var reason_input = document.getElementById('reason');
+    var reason_empty_warning = document.getElementById('reason_empty_warning');
+    function checkReason() {
+        let value = reason_input.value.trim();
+        if(value == '') {
+            reason_empty_warning.style.display = 'block';
+            reason_input_error = 1;
+        } else {
+            reason_empty_warning.style.display = 'none';
+            reason_input_error = 0;
+        }
+        enableSubmit();
+    }
+    checkReason();
+    reason_input.onkeyup = function() { checkReason(); };
+}
 
 // check if article exists
 var exists_error = 0;
