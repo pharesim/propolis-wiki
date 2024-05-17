@@ -70,8 +70,17 @@ def webhook_send(text):
     data = {}
     data["content"] = text
     data["username"] = conf['WIKI_USER']+" activity"
-
     return requests.post(url, json=data, headers={"Content-Type": "application/json"})
+
+def send_to_waves(title,metadata,link):
+    text = metadata['appdata']['user']+' has edited the Propolis Wiki article '+title+"\n"
+    if('reason' in metadata['appdata']):
+        text += 'Reason: '+metadata['appdata']['reason']+"\n"
+    text += link
+    for w in conf['WAVES_ACCOUNTS']:
+        wa = Account(w)
+        for post in wa.blog_history(limit=1,reblogs=False):
+            pprint("Send to "+wa+'/'+post['permlink']+":\n"+text)
 
 # start from block after wiki user account creation
 startblock = 0
@@ -98,8 +107,10 @@ while 1 == 1:
             webhook_text = 'New edit by '+metadata['appdata']['user']+' on article '+op['title']
             if 'reason' in metadata['appdata']:
                 webhook_text += ' ('+metadata['appdata']['reason']+')'
-            webhook_text += ' https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
+            rev_link = 'https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
+            webhook_text += ' '+rev_link
             webhook_send(webhook_text)
+            #send_to_waves(op['title'],metadata,rev_link)
 
             transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
             signer = ''
