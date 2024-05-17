@@ -89,7 +89,12 @@ for op in acc.history(use_block_num=False,start=0,stop=1):
 
 while 1 == 1:
     cur = conn.cursor()
-    for op in acc.history(only_ops=['comment'],start=startblock):
+    try:
+        ophistory = acc.history(only_ops=['comment'],start=startblock)
+    except:
+        ophistory = {}
+
+    for op in ophistory:
         cur.execute('SELECT trx_id FROM comments WHERE trx_id=%s',(op['trx_id'],))
         try: 
             exists = cur.fetchall()[0]
