@@ -115,7 +115,7 @@ while 1 == 1:
             rev_link = 'https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
             webhook_text += ' '+rev_link
             webhook_send(webhook_text)
-            #send_to_waves(op['title'],metadata,rev_link)
+            send_to_waves(op['title'],metadata,rev_link)
 
             transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
             signer = ''
