@@ -73,8 +73,8 @@ def webhook_send(text):
     return requests.post(url, json=data, headers={"Content-Type": "application/json"})
 
 def send_to_waves(title,metadata,link):
-    text = metadata['appdata']['user']+' has edited the Propolis Wiki article '+title+"\n"
-    if('reason' in metadata['appdata']):
+    text = 'The Propolis wiki article '+title+' was edited by @'+metadata['appdata']['user']+"\n"
+    if('reason' in metadata['appdata'] and metadata['appdata']['reason'] != ''):
         text += 'Reason: '+metadata['appdata']['reason']+"\n"
     text += link
     accounts = []
