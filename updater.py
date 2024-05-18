@@ -85,7 +85,8 @@ def send_to_waves(title,metadata,link):
     for w in accounts:
         wa = Account(w)
         for post in wa.blog_history(limit=1,reblogs=False):
-            pprint("Send to "+w+'/'+post['permlink']+":\n"+text)
+            c = Comment(w+'/'+post['permlink'])
+            c.reply(text, title=title+' edited', author=conf['WIKI_USER'], meta=None)
 
 # start from block after wiki user account creation
 startblock = 0
