@@ -78,9 +78,9 @@ def send_to_waves(title,metadata,link):
         text += 'Reason: '+metadata['appdata']['reason']+"\n"
     text += link
     accounts = []
-    if conf['WAVES_ACCOUNT'] is not '':
+    if conf['WAVES_ACCOUNT'] != '':
         accounts.append(conf['WAVES_ACCOUNT'])
-    if conf['LEOTHREADS_ACCOUNT'] is not '':
+    if conf['LEOTHREADS_ACCOUNT'] != '':
         accounts.append(conf['LEOTHREADS_ACCOUNT'])
     for w in accounts:
         wa = Account(w)
