@@ -28,6 +28,11 @@ Install latest dist version including dependencies
 ```bash
   pip install dist/wiki*.whl
 ```
+
+## Database
+
+Propolis requires a complementary PostgreSQL database to store some metadata. The structure can be derived from the updater.py script until there is a setup script/dump available.
+
 ## Run Locally
 
 Start the local flask dev server
