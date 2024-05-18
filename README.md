@@ -7,9 +7,7 @@
 A web3 wiki using the hive blockchain for storing articles. 
 
 
-
-
-## Installation
+## Setup
 
 Clone the project
 
@@ -23,17 +21,11 @@ Go to the project directory
   cd propolis-wiki
 ```
 
-Install latest dist version including dependencies
-
-```bash
-  pip install dist/wiki*.whl
-```
-
-## Database
+### Database
 
 Propolis requires a complementary PostgreSQL database to store some metadata. The structure can be derived from the updater.py script until there is a setup script/dump available.
 
-## Run Locally
+### Run Locally
 
 Start the local flask dev server
 
@@ -41,16 +33,13 @@ Start the local flask dev server
   ./wiki.sh
 ```
 
+### Deployment
 
-## Build
-
-Create dist file
+Install latest dist version including dependencies
 
 ```bash
-  ./build.sh
+  pip install dist/wiki*.whl
 ```
-
-## Deployment
 
 To deploy this project, you should use a webserver configured to your needs.
 
@@ -69,6 +58,17 @@ WSGIScriptAlias / /home/wiki/propolis-wiki/wsgi.py
 </Directory>
 
 ```
+
+### Build
+
+Create a new dist file
+
+```bash
+  ./build.sh
+```
+
+Don't forget to bump version in pyproject.toml and wiki/static/js/main.js
+
 ## Contributing
 
 Contributions are always welcome!
