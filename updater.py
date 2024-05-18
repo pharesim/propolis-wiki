@@ -165,9 +165,9 @@ while 1 == 1:
                 abstract = split[0]
                 body = split[1]
             cur.execute('INSERT INTO posts (permlink, tsvector)'
-                " VALUES (%s, %s, setweight(to_tsvector(coalesce(%s,'')), 'A') || setweight(to_tsvector(coalesce(%s,'')), 'B') || setweight(to_tsvector(coalesce(%s,'')), 'C') || setweight(to_tsvector(coalesce(%s,'')), 'D'))"
+                " VALUES (%s, setweight(to_tsvector(coalesce(%s,'')), 'A') || setweight(to_tsvector(coalesce(%s,'')), 'B') || setweight(to_tsvector(coalesce(%s,'')), 'C') || setweight(to_tsvector(coalesce(%s,'')), 'D'))"
                 ' ON CONFLICT(permlink) DO UPDATE SET tsvector = EXCLUDED.tsvector',
-                (op['permlink'], op['title'], op['title'], ' '.join(tags), abstract, body))
+                (op['permlink'], op['title'], ' '.join(tags), abstract, body))
             cur.execute('INSERT INTO comments (trx_id, permlink, timestamp, author)'
                 ' VALUES (%s, %s, %s, %s)'
                 ' ON CONFLICT(trx_id) DO NOTHING',
