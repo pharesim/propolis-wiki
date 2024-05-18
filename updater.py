@@ -77,7 +77,12 @@ def send_to_waves(title,metadata,link):
     if('reason' in metadata['appdata']):
         text += 'Reason: '+metadata['appdata']['reason']+"\n"
     text += link
-    for w in conf['WAVES_ACCOUNTS']:
+    accounts = []
+    if conf['WAVES_ACCOUNT'] not '':
+        accounts.append(conf['WAVES_ACCOUNT'])
+    if conf['LEOTHREADS_ACCOUNT'] not '':
+        accounts.append(conf['LEOTHREADS_ACCOUNT'])
+    for w in accounts:
         wa = Account(w)
         for post in wa.blog_history(limit=1,reblogs=False):
             pprint("Send to "+wa+'/'+post['permlink']+":\n"+text)

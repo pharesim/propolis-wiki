@@ -9,3 +9,5 @@ DB_USERNAME = 'propolis'
 DB_PASSWORD = 'propolis'
 
 DISCORD_WEBHOOK = 'https://discord.com/api/webhooks/1234567890/abcdefg'
+WAVES_ACCOUNT = ''
+LEOTHREADS_ACCOUNT = ''
