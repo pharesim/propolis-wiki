@@ -21,6 +21,13 @@ Go to the project directory
   cd propolis-wiki
 ```
 
+edit config file
+
+```bash
+  cp instance/config_default.py instance/config.py
+  nano instance/config.py
+```
+
 ### Database
 
 Propolis requires a complementary PostgreSQL database to store some metadata. The structure can be derived from the updater.py script until there is a setup script/dump available.
