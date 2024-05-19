@@ -148,13 +148,11 @@ while 1 == 1:
                         break
                 metadata['appdata']['user'] = None
             
-            got_post = 0
-            while got_post == 0:
+            post = {}
+            while post == {}:
                 try:
                     post = Comment(conf['WIKI_USER']+"/"+op['permlink'])
-                    got_post = 1
                 except:
-                    got_post = 0
                     time.sleep(1)
             tags = metadata['tags']
             abstract = ''
