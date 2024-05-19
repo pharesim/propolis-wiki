@@ -32,7 +32,7 @@ conn = psycopg2.connect(
     user=conf['DB_USERNAME'],
     password=conf['DB_PASSWORD'])
 
-client = Hive()
+client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']])
 acc = Account(conf['WIKI_USER'])
 hive = Blockchain()
 w = Wallet()
@@ -85,8 +85,8 @@ def send_to_waves(title,metadata,link):
     for w in accounts:
         wa = Account(w)
         for post in wa.blog_history(limit=1,reblogs=False):
-            c = Comment(w+'/'+post['permlink'])
-            #c.reply(text, title=title+' edited', author=conf['WIKI_USER'], meta=None)
+            c = Comment(w+'/'+post['permlink'], hive_instance=client)
+            c.reply(text, title=title+' edited', author=conf['WIKI_USER'], meta=None)
 
 # start from block after wiki user account creation
 startblock = 0
