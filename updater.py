@@ -87,6 +87,7 @@ def send_to_waves(title,metadata,link):
         for post in wa.blog_history(limit=1,reblogs=False):
             c = Comment(w+'/'+post['permlink'], hive_instance=client)
             c.reply(text, title=title+' edited', author=conf['WIKI_USER'], meta=None)
+            time.sleep(5)
 
 # start from block after wiki user account creation
 startblock = 0
@@ -155,7 +156,7 @@ while 1 == 1:
                         break
                 metadata['appdata']['user'] = None
             
-            time.sleep(15)
+            time.sleep(10)
             post = Comment(conf['WIKI_USER']+"/"+op['permlink'])           
             tags = metadata['tags']
             abstract = ''
