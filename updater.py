@@ -116,14 +116,6 @@ while 1 == 1:
             if 'appdata' not in metadata or 'user' not in metadata['appdata']:
                 metadata['appdata']['user'] = None
 
-            webhook_text = 'New edit by '+metadata['appdata']['user']+' on article '+op['title']
-            if 'reason' in metadata['appdata']:
-                webhook_text += ' ('+metadata['appdata']['reason']+')'
-            rev_link = 'https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
-            webhook_text += ' '+rev_link
-            webhook_send(webhook_text)
-            send_to_waves(op['title'],metadata,rev_link)
-
             transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
             signer = ''
             for key in transaction.verify(chain='HIVE2'):
@@ -156,8 +148,14 @@ while 1 == 1:
                         break
                 metadata['appdata']['user'] = None
             
-            time.sleep(10)
-            post = Comment(conf['WIKI_USER']+"/"+op['permlink'])           
+            got_post = 0
+            while got_post == 0:
+                try:
+                    post = Comment(conf['WIKI_USER']+"/"+op['permlink'])
+                    got_post = 1
+                except:
+                    got_post = 0
+                    time.sleep(1)
             tags = metadata['tags']
             abstract = ''
             body = post['body']
@@ -184,6 +182,18 @@ while 1 == 1:
                     cur.execute('INSERT INTO categories_posts (permlink, category)'
                         ' VALUES (%s,%s)',
                         (op['permlink'],tag))
+                    
+            webhook_text = 'New edit by '+metadata['appdata']['user']+' on article '+op['title']
+            if 'reason' in metadata['appdata']:
+                webhook_text += ' ('+metadata['appdata']['reason']+')'
+            rev_link = 'https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
+            webhook_text += ' '+rev_link
+            try:
+                webhook_send(webhook_text)
+                send_to_waves(op['title'],metadata,rev_link)
+            except Exception as error:
+                pprint(error)
+
         startblock = op['block']
 
     conn.commit()
