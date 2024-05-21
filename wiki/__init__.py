@@ -20,7 +20,8 @@ def create_app():
         SESSION_REDIS='redis://127.0.0.1:6379',
         SESSION_USE_SIGNER=True,
         DB_HOSTNAME = 'localhost',
-        START_PAGE='welcome-to-propolis-wiki'
+        START_PAGE='Welcome-To-Propolis-Wiki',
+        EDIT_GUIDELINES='How-To-Edit-Propolis-Wiki'
     )
 
     app.config.from_pyfile('config.py')

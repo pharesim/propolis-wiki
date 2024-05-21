@@ -3,10 +3,9 @@
 {% block content %}
 <div class="editorview">
 
+<p class="roleNote">Please read <a href="/wiki/{{ config['EDIT_GUIDELINES'] }}">how to edit Propolis Wiki</a> before submitting the article.</p>
 {% if request.path.split('/')[1] == 'create' %}
 {% set where = 'create' %}
-<p class="roleNote">Please follow the guidelines for the creation of new articles.</p>
-<br />
 {% else %}
 {% set where = 'edit' %}
 <script src="{{ url_for('static', filename='js/vendor/diff-match-patch.js') }}"></script>
