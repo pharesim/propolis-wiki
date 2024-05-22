@@ -127,7 +127,7 @@ def extractCodeBlocks(body):
     codeblocks = []
     parts = body.split("```")
     in_code = 0
-    for i, val in enumerate(parts):
+    for val in parts:
         if in_code == 1:
             new_body += "```"
             codeblocks.append(val)
@@ -143,7 +143,7 @@ def restoreCodeBlocks(body,codeblocks):
     in_code = 0
     n = 0
     parts = body.split("```")
-    for i, val in enumerate(parts):
+    for val in parts:
         if in_code == 1:
             new_body += "```"
             new_body += codeblocks[n]
