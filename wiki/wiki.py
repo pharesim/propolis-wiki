@@ -77,6 +77,7 @@ def hive_account_update(account_data):
     return hive_broadcast(op)
 
 def formatPostLink(permlink):
+    permlink = permlink.replace('(','').replace(')','').replace(',','')
     split = permlink.split("-")
     if(len(split) > 1):
         permlink = ''
