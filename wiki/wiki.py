@@ -128,17 +128,25 @@ def wikifyBody(oldBody):
     references = {}
     refsplit = new_body.replace('<ref name=multiple>','<ref>').split("<ref>")
     new_body = refsplit[0]
+    incode = 0
     for i, val in enumerate(refsplit):
+        if incode < 1:
+            incode = len(val.split("```"))-1
         if(i > 0):
-            refrest = val.split("</ref>")
-            if refrest[0] not in references.keys():
-                references[refrest[0]] = 1
-                num = len(references)
+            if incode > 0:
+                new_body += '<ref>'+val
             else:
-                references[refrest[0]] = references[refrest[0]]+1
-                num = list(references).index(refrest[0])+1
-            new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'_'+str(references[refrest[0]])+'">['+str(num)+"]</a></sup>"
-            new_body += refrest[1]
+                refrest = val.split("</ref>")
+                if refrest[0] not in references.keys():
+                    references[refrest[0]] = 1
+                    num = len(references)
+                else:
+                    references[refrest[0]] = references[refrest[0]]+1
+                    num = list(references).index(refrest[0])+1
+                new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'_'+str(references[refrest[0]])+'">['+str(num)+"]</a></sup>"
+                new_body += refrest[1]
+        if incode > 0 and len(val.split("```"))-1 < 1:
+            incode = 0
 
     if len(references) > 0:
         new_body += "\n## References\n"
