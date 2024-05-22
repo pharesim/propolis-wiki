@@ -160,7 +160,7 @@ def wikifyBody(oldBody):
             if(val[1] < 1):
                 new_body += ' class="article404"'
             new_body += '>'+val[0]+"</span>\n"
-
+    
     headers = new_body.split("\n## ")
     if(len(headers) > 1):
         new_body = ''
@@ -174,7 +174,7 @@ def wikifyBody(oldBody):
                     contents += '<ul>'
                     for j, h in enumerate(h3s):
                         if j == 0:
-                            new_body = h
+                            new_body += h
                         else:
                             z = h.split("\n",1)
                             new_body += '<span id="'+toHtmlId(z[0])+'">'+z[0]+"</span>\n"+z[1]
