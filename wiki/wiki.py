@@ -360,7 +360,7 @@ def edit(article):
 @bp.route('/wiki/<article>')
 def wiki(article):
     if(article == ''):
-        article = current_app.config['START_PAGE']
+        return redirect(url_for('wiki.wiki', article=formatPostLink(current_app.config['START_PAGE'])))
     article_f = formatPostLink(article)
     if(article_f != article):
         return redirect(url_for('wiki.wiki', article=article_f),301)  
