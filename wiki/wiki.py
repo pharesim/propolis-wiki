@@ -122,31 +122,57 @@ def restoreReferences(body):
 def wikifyInternalLinks(body):
     return body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
 
+def extractCodeBlocks(body):
+    new_body = ''
+    codeblocks = []
+    parts = body.split("```")
+    in_code = 0
+    for i, val in enumerate(parts):
+        if in_code == 1:
+            new_body += "```"
+            codeblocks.append(val)
+            in_code = 0
+            new_body += "```"
+        else:
+            new_body += val
+            in_code = 1
+    return new_body, codeblocks
+
+def restoreCodeBlocks(body,codeblocks):
+    new_body = ''
+    in_code = 0
+    n = 0
+    parts = body.split("```")
+    for i, val in enumerate(parts):
+        if in_code == 1:
+            new_body += "```"
+            new_body += codeblocks[n]
+            n = n+1
+            in_code = 0
+            new_body += "```"
+        else:
+            new_body += val
+            in_code = 1
+    return new_body
+
 def wikifyBody(oldBody):
     new_body = restoreSource(oldBody)
+    new_body, codeblocks = extractCodeBlocks(new_body)
 
     references = {}
     refsplit = new_body.replace('<ref name=multiple>','<ref>').split("<ref>")
     new_body = refsplit[0]
-    incode = 0
     for i, val in enumerate(refsplit):
-        if incode < 1:
-            incode = len(val.split("```"))-1
         if(i > 0):
-            if incode > 0:
-                new_body += '<ref>'+val
+            refrest = val.split("</ref>")
+            if refrest[0] not in references.keys():
+                references[refrest[0]] = 1
+                num = len(references)
             else:
-                refrest = val.split("</ref>")
-                if refrest[0] not in references.keys():
-                    references[refrest[0]] = 1
-                    num = len(references)
-                else:
-                    references[refrest[0]] = references[refrest[0]]+1
-                    num = list(references).index(refrest[0])+1
-                new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'_'+str(references[refrest[0]])+'">['+str(num)+"]</a></sup>"
-                new_body += refrest[1]
-        if incode > 0 and len(val.split("```"))-1 < 1:
-            incode = 0
+                references[refrest[0]] = references[refrest[0]]+1
+                num = list(references).index(refrest[0])+1
+            new_body += '<sup><a href="#reference_'+str(num)+'" id="cite_ref'+str(num)+'_'+str(references[refrest[0]])+'">['+str(num)+"]</a></sup>"
+            new_body += refrest[1]
 
     if len(references) > 0:
         new_body += "\n## References\n"
@@ -203,7 +229,7 @@ def wikifyBody(oldBody):
         if(z[0][0:5] != '<span'):
             z[0] = '<span id="'+toHtmlId(z[0])+'">'+z[0]+'</span>'
         new_body = headers[0]+contents+"\n\n"+'## '+z[0]+"\n"+z[1]
-    return new_body
+    return restoreCodeBlocks(new_body,codeblocks)
 
 def getRelated(new_body):
     related = []
