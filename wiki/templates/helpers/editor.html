@@ -1,8 +1,8 @@
 <div id="editor">{% if body is defined %}{{ body }}{% endif %}</div>
-<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-<script src="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.js"></script>
+<script src="{{ url_for('static', filename='js/vendor/toastui-editor-all.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/vendor/toastui-editor-plugin-table-merged-cell.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/tui-editor-plugin-reference.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.js"></script>
-<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
-<link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-table-merged-cell/latest/toastui-editor-plugin-table-merged-cell.min.css" />
+<script src="{{ url_for('static', filename='js/vendor/latex.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/toastui-editor.min.css') }}" />
+<link rel="stylesheet" href="{{ url_for('static', filename='css/toastui-editor-plugin-table-merged-cell.min.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/tui-editor-plugin-reference.css') }}" />

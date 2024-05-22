@@ -18,10 +18,10 @@
 			var wiki_user = "{{ config['WIKI_USER'] }}";
 		</script>
 		<script src="{{ url_for('static', filename='js/tui-editor-latex.js') }}"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@hiveio/keychain@latest"></script>
-		<script src="https://unpkg.com/@hiveio/dhive@latest/dist/dhive.js"></script>
+        <script src="{{ url_for('static', filename='js/vendor/keychain.js') }}"></script>
+		<script src="{{ url_for('static', filename='js/vendor/dhive.js') }}"></script>
 
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/fonts/font-awesome.css') }}" />
     </head>
     <body>
         <div class="wrapAll clearfix">
