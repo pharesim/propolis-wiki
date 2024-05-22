@@ -27,6 +27,8 @@ edit config file
   cp instance/config_default.py instance/config.py
   nano instance/config.py
 ```
+If you want the updater script to post to Discord, set DISCORD_WEBHOOK to a working link.
+Edits can also be announced to ecency.waves and/or leothreads, set the respective accounts in WAVES_ACCOUNT and/or LEOTHREADS_ACCOUNT to activate.
 
 ### Database
 
