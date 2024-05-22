@@ -155,12 +155,9 @@ def restoreCodeBlocks(body,codeblocks):
             in_code = 1
     return new_body
 
-def wikifyBody(oldBody):
-    new_body = restoreSource(oldBody)
-    new_body, codeblocks = extractCodeBlocks(new_body)
-
+def wikifyReferences(body):
     references = {}
-    refsplit = new_body.replace('<ref name=multiple>','<ref>').split("<ref>")
+    refsplit = body.replace('<ref name=multiple>','<ref>').split("<ref>")
     new_body = refsplit[0]
     for i, val in enumerate(refsplit):
         if(i > 0):
@@ -185,17 +182,11 @@ def wikifyBody(oldBody):
                 new_body += '<a class="toref" href="#cite_ref'+str(i+1)+'_'+str(j)+'">↑</a> ';
             new_body += '<span id="reference_'+str(i+1)+'">'+val+"</span>\n"
             i = i+1
+    return new_body
 
-    related, new_body = getRelated(new_body)
-    if len(related) > 0:
-        new_body += "\n## Related Articles\n"
-        for val in related:
-            new_body += '<span title="'+val[2]+'"'
-            if(val[1] < 1):
-                new_body += ' class="article404"'
-            new_body += '>'+val[0]+"</span>\n"
-    
-    headers = new_body.split("\n## ")
+def wikifyHeaders(body):
+    headers = body.split("\n## ")
+    new_body = body
     if(len(headers) > 1):
         new_body = ''
         contents = '<br><div class="contentsPanel"><div class="contentsHeader">Contents</div><ul>'
@@ -229,6 +220,23 @@ def wikifyBody(oldBody):
         if(z[0][0:5] != '<span'):
             z[0] = '<span id="'+toHtmlId(z[0])+'">'+z[0]+'</span>'
         new_body = headers[0]+contents+"\n\n"+'## '+z[0]+"\n"+z[1]
+    return new_body
+
+def wikifyBody(body):
+    new_body, codeblocks = extractCodeBlocks(restoreSource(body))
+
+    new_body = wikifyReferences(new_body)
+
+    related, new_body = getRelated(new_body)
+    if len(related) > 0:
+        new_body += "\n## Related Articles\n"
+        for val in related:
+            new_body += '<span title="'+val[2]+'"'
+            if(val[1] < 1):
+                new_body += ' class="article404"'
+            new_body += '>'+val[0]+"</span>\n"
+    
+    new_body = wikifyHeaders(new_body)
     return restoreCodeBlocks(new_body,codeblocks)
 
 def getRelated(new_body):
