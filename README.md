@@ -34,6 +34,14 @@ Edits can also be announced to ecency.waves and/or leothreads, set the respectiv
 
 Propolis requires a complementary PostgreSQL database to store some metadata. The structure can be derived from the updater.py script until there is a setup script/dump available.
 
+### Sync with Hive
+
+The updater script will sync your database with the Hive blockchain
+
+```bash
+  python3 updater.py
+```
+
 ### Run Locally
 
 Start the local flask dev server
