@@ -169,14 +169,14 @@ while 1 == 1:
                 ' VALUES (%s, %s, %s, %s)'
                 ' ON CONFLICT(trx_id) DO NOTHING',
                 (op['trx_id'],op['permlink'],op['timestamp'],metadata['appdata']['user']))
+            cur.execute('DELETE FROM categories_posts WHERE permlink=%s',
+                (op['permlink'],))
             for tag in tags:
                 if(tag != 'wiki' and tag != ''):
                     cur.execute('INSERT INTO categories (category)'
                         ' VALUES (%s)'
                         ' ON CONFLICT(category) DO NOTHING',
                         (tag,))
-                    cur.execute('DELETE FROM categories_posts WHERE permlink=%s AND category=%s',
-                                (op['permlink'],tag))
                     cur.execute('INSERT INTO categories_posts (permlink, category)'
                         ' VALUES (%s,%s)',
                         (op['permlink'],tag))
