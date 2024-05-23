@@ -27,10 +27,20 @@ edit config file
   cp instance/config_default.py instance/config.py
   nano instance/config.py
 ```
+If you want the updater script to post to Discord, set DISCORD_WEBHOOK to a working link.
+Edits can also be announced to ecency.waves and/or leothreads, set the respective accounts in WAVES_ACCOUNT and/or LEOTHREADS_ACCOUNT to activate.
 
 ### Database
 
 Propolis requires a complementary PostgreSQL database to store some metadata. The structure can be derived from the updater.py script until there is a setup script/dump available.
+
+### Sync with Hive
+
+The updater script will sync your database with the Hive blockchain
+
+```bash
+  python3 updater.py
+```
 
 ### Run Locally
 
