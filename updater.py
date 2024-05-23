@@ -72,11 +72,20 @@ def webhook_send(text):
     data["username"] = conf['WIKI_USER']+" activity"
     return requests.post(url, json=data, headers={"Content-Type": "application/json"})
 
-def send_to_waves(title,metadata,link):
+def send_to_waves(title,metadata,link,permlink):
     text = 'The Propolis wiki article '+title+' was edited by @'+metadata['appdata']['user']+"\n"
     if('reason' in metadata['appdata'] and metadata['appdata']['reason'] != ''):
         text += 'Reason: '+metadata['appdata']['reason']+"\n"
     text += link
+    cur.execute('SELECT DISTINCT author FROM comments WHERE permlink=%s ORDER BY timestamp ASC',(permlink,))
+    try: 
+        authors = cur.fetchall()
+        if len(authors) > 0:
+            text += "\n"+'Previous editors: '
+            for author in authors:
+                text += '@'+author+' '
+    except:
+        authors = []
     accounts = []
     if conf['WAVES_ACCOUNT'] != '':
         accounts.append(conf['WAVES_ACCOUNT'])
@@ -188,7 +197,7 @@ while 1 == 1:
             webhook_text += ' '+rev_link
             try:
                 webhook_send(webhook_text)
-                send_to_waves(op['title'],metadata,rev_link)
+                send_to_waves(op['title'],metadata,rev_link,op['permlink'])
             except Exception as error:
                 pprint(error)
 
