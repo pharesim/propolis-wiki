@@ -509,9 +509,12 @@ def talk(article):
 @bp.route('/wiki/Categories:Overview')
 def categories():
     categories = db_get_all('SELECT category FROM categories ORDER BY category;')
+    c = []
     for i, category in enumerate(categories):
-        categories[i] = (categories[i][0],db_count('SELECT count(category) FROM categories_posts WHERE category=%s;',(category[0],)))
-    return render_template('categories.html', categories=categories,notabs=True,pagetitle='Categories')
+        count = db_count('SELECT count(category) FROM categories_posts WHERE category=%s;',(category[0],))
+        if count > 0:
+            c.append((categories[i][0],count))
+    return render_template('categories.html', categories=c,notabs=True,pagetitle='Categories')
 
 @bp.route('/wiki/Category:<category>')
 def category(category):
