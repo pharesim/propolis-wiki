@@ -510,10 +510,10 @@ def talk(article):
 def categories():
     categories = db_get_all('SELECT category FROM categories ORDER BY category;')
     c = []
-    for i, category in enumerate(categories):
+    for category in categories:
         count = db_count('SELECT count(category) FROM categories_posts WHERE category=%s;',(category[0],))
         if count > 0:
-            c.append((categories[i][0],count))
+            c.append((category[0],count))
     return render_template('categories.html', categories=c,notabs=True,pagetitle='Categories')
 
 @bp.route('/wiki/Category:<category>')
