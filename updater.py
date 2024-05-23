@@ -80,12 +80,12 @@ def send_to_waves(title,metadata,link,permlink):
     cur.execute('SELECT DISTINCT author FROM comments WHERE permlink=%s AND author!=%s ORDER BY timestamp ASC',(permlink,metadata['appdata']['user'],))
     try: 
         authors = cur.fetchall()
-        if len(authors) > 0:
-            text += "\n"+'Previous editors: '
-            for author in authors:
-                text += '@'+author[0]+' '
     except:
         authors = []
+    if len(authors) > 0:
+        text += "\n"+'Previous editors:'
+        for author in authors:
+            text += ' @'+author[0]
     accounts = []
     if conf['WAVES_ACCOUNT'] != '':
         accounts.append(conf['WAVES_ACCOUNT'])
