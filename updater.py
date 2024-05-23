@@ -77,7 +77,7 @@ def send_to_waves(title,metadata,link,permlink):
     if('reason' in metadata['appdata'] and metadata['appdata']['reason'] != ''):
         text += 'Reason: '+metadata['appdata']['reason']+"\n"
     text += link
-    cur.execute('SELECT DISTINCT author FROM comments WHERE permlink=%s AND author!=%s ORDER BY timestamp ASC',(permlink,metadata['appdata']['user'],))
+    cur.execute('SELECT DISTINCT author, timestamp FROM comments WHERE permlink=%s AND author!=%s ORDER BY timestamp ASC',(permlink,metadata['appdata']['user'],))
     try: 
         authors = cur.fetchall()
     except:
