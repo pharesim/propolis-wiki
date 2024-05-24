@@ -404,6 +404,12 @@ div.articleRightInner {
 	line-height: 0;
 	float: left;
 }
+.tabsLeft > ul > li::marker {
+	content: ""
+}
+.tabsRight > ul > li::marker {
+	content: ""
+}
 #simpleSearch {
 	margin: 1em 1em 0em 0.5em;
 	display: block;
