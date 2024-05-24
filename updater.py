@@ -72,11 +72,20 @@ def webhook_send(text):
     data["username"] = conf['WIKI_USER']+" activity"
     return requests.post(url, json=data, headers={"Content-Type": "application/json"})
 
-def send_to_waves(title,metadata,link):
+def send_to_waves(title,metadata,link,permlink):
     text = 'The Propolis wiki article '+title+' was edited by @'+metadata['appdata']['user']+"\n"
     if('reason' in metadata['appdata'] and metadata['appdata']['reason'] != ''):
         text += 'Reason: '+metadata['appdata']['reason']+"\n"
     text += link
+    cur.execute('SELECT DISTINCT author, timestamp FROM comments WHERE permlink=%s AND author!=%s ORDER BY timestamp ASC',(permlink,metadata['appdata']['user'],))
+    try: 
+        authors = cur.fetchall()
+    except:
+        authors = []
+    if len(authors) > 0:
+        text += "\n"+'Previous editors:'
+        for author in authors:
+            text += ' @'+author[0]
     accounts = []
     if conf['WAVES_ACCOUNT'] != '':
         accounts.append(conf['WAVES_ACCOUNT'])
@@ -169,14 +178,14 @@ while 1 == 1:
                 ' VALUES (%s, %s, %s, %s)'
                 ' ON CONFLICT(trx_id) DO NOTHING',
                 (op['trx_id'],op['permlink'],op['timestamp'],metadata['appdata']['user']))
+            cur.execute('DELETE FROM categories_posts WHERE permlink=%s',
+                (op['permlink'],))
             for tag in tags:
                 if(tag != 'wiki' and tag != ''):
                     cur.execute('INSERT INTO categories (category)'
                         ' VALUES (%s)'
                         ' ON CONFLICT(category) DO NOTHING',
                         (tag,))
-                    cur.execute('DELETE FROM categories_posts WHERE permlink=%s AND category=%s',
-                                (op['permlink'],tag))
                     cur.execute('INSERT INTO categories_posts (permlink, category)'
                         ' VALUES (%s,%s)',
                         (op['permlink'],tag))
@@ -188,7 +197,7 @@ while 1 == 1:
             webhook_text += ' '+rev_link
             try:
                 webhook_send(webhook_text)
-                send_to_waves(op['title'],metadata,rev_link)
+                send_to_waves(op['title'],metadata,rev_link,op['permlink'])
             except Exception as error:
                 pprint(error)
 
