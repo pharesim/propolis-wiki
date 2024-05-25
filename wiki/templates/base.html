@@ -3,9 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>
-			{% if pagetitle is defined %}{{ pagetitle }} | {% endif %}
-			{% if post is defined and post.title is defined %}{{ post.title }} | {% endif %}
-			Propolis - web3 Wiki
+			{% if pagetitle is defined %}{{ pagetitle }} | {% endif %}{% if post is defined and post.title is defined %}{{ post.title }} | {% endif %}Propolis - web3 Wiki
 		</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
