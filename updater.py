@@ -77,15 +77,18 @@ def send_to_waves(title,metadata,link,permlink):
     if('reason' in metadata['appdata'] and metadata['appdata']['reason'] != ''):
         text += 'Reason: '+metadata['appdata']['reason']+"\n"
     text += link
-    cur.execute('SELECT DISTINCT author, timestamp FROM comments WHERE permlink=%s AND author!=%s ORDER BY timestamp ASC',(permlink,metadata['appdata']['user'],))
+    cur.execute('SELECT author FROM comments WHERE permlink=%s ORDER BY timestamp ASC',(permlink,))
     try: 
         authors = cur.fetchall()
     except:
         authors = []
     if len(authors) > 0:
+        printed = []
         text += "\n"+'Previous editors:'
         for author in authors:
-            text += ' @'+author[0]
+            if author not in printed:
+                text += ' @'+author[0]
+                printed.append(author)
     accounts = []
     if conf['WAVES_ACCOUNT'] != '':
         accounts.append(conf['WAVES_ACCOUNT'])
