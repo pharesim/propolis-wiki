@@ -1,6 +1,6 @@
 [project]
 name = "wiki"
-version = "0.7.6"
+version = "0.7.7"
 description = "A wiki built on HIVE"
 dependencies = [
     "flask",
