@@ -82,11 +82,11 @@ def send_to_waves(title,metadata,link,permlink):
         authors = cur.fetchall()
     except:
         authors = []
-    if len(authors) > 0:
+    if len(authors) > 1:
         printed = []
         text += "\n"+'Previous editors:'
-        for author in authors:
-            if author not in printed:
+        for i, author in enumerate(authors):
+            if author not in printed and i < len(authors)-1:
                 text += ' @'+author[0]
                 printed.append(author)
     accounts = []
