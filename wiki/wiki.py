@@ -333,8 +333,9 @@ def pages(page):
 @bp.route('/create/<article>')
 def create(article):
     article_f = formatPostLink(article)
+    redirect_url = 'create/%s' % article_f if article_f else 'create'
     if 'username' not in session.keys():
-        return redirect(url_for('wiki.hive_keychain_auth.login',redirect_url='create/'+article_f))
+        return redirect(url_for('wiki.hive_keychain_auth.login',redirect_url=redirect_url)
     if(session['userlevel'] < 1):
         return redirect('/insufficient_permissions') 
     if(article_f != article):
