@@ -2,10 +2,22 @@
 <html class="no-js" lang="en">
     <head>
         <meta charset="utf-8">
-        <title>
-			{% if pagetitle is defined %}{{ pagetitle }} | {% endif %}{% if post is defined and post.title is defined %}{{ post.title }} | {% endif %}Propolis - web3 Wiki
-		</title>
-        <meta name="description" content="">
+
+		{% set pagetitle = pagetitle + ' | Propolis - web3 Wiki' %}
+		{% set pagedescription = "Propolis is a wiki which utilizes the Hive blockchain for data storage." %}
+		{% set preview_image = "https://propol.is/static/img/propolis/discordp.png" %}
+		<title>{{ pagetitle }}</title>
+		<meta name="description" content="{{ pagedescription }}" />
+
+		<meta property="og:title" content="{{ pagetitle }}" />
+		<meta property="og:description" content="{{ pagedescription }}" />
+		<meta property="og:image" content="{{ preview_image }}" />
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="{{ pagetitle }}" />
+		<meta name="twitter:description" content="{{ pagedescription }}" />
+		<meta name="twitter:image" content="{{ preview_image }}" />
+
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" href="{{ url_for('static', filename='img/propolis/propolisdiscord.png') }}">
         <link rel="apple-touch-icon" href="apple-touch-icon.png">

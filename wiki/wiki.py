@@ -361,7 +361,7 @@ def edit(article):
         post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
         body = Markup(xssEscape(restoreSource(post.body)))
         post.json_metadata['tags'].remove('wiki')
-        return render_template('edit.html',post=post,body=body,article_title=post.title,pagetitle='Edit article')
+        return render_template('edit.html',post=post,body=body,article_title=xssEscape(post.title),pagetitle='Edit article')
     except:
         return redirect(url_for('wiki.create', article=article_f))
         
@@ -381,13 +381,13 @@ def wiki(article):
         if post.json_metadata['appdata']['user']:
             last_update.append(post.json_metadata['appdata']['user'])   
         body = Markup(xssEscape(wikifyBody(post.body)))
-        return render_template('wiki.html',post=post,body=body,last_update=last_update)  
+        return render_template('wiki.html',post=post,body=body,last_update=last_update,pagetitle=xssEscape(post.title))
     except:
         post = {
             'title': article_f,
             'body': "The community has yet to [write this article](/create/"+article_f+").\n\nThis is where you step in. Care to write what you know from a simple description or even a full, referenced wiki? Content will be community-fed and edited, you will be helping the cause and qualify for a weekly content reward.\n\n[Give it a try!](/create/"+article_f+")"
         }
-        return render_template('wiki.html',post=post,body=post['body'])
+        return render_template('wiki.html',post=post,body=post['body'],pagetitle='Create article')
     
 @bp.route('/@<username>/<permlink>')
 def reroute(username, permlink):
