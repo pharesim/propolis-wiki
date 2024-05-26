@@ -21,7 +21,7 @@ hive_keychain_auth = Blueprint(
 def login(redirect_url = ''):
     if 'username' in session.keys():
         return redirect('/'+redirect_url)
-    return render_template('login.html',redirect_url=redirect_url,notabs=True)
+    return render_template('login.html',redirect_url=redirect_url,notabs=True, pagetitle="Login")
 
 @hive_keychain_auth.route("/logout")
 def logout():
