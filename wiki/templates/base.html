@@ -3,20 +3,20 @@
     <head>
         <meta charset="utf-8">
 
-		{% set pagetitle = pagetitle + ' | Propolis - web3 Wiki' %}
-		{% set pagedescription = "Propolis is a wiki which utilizes the Hive blockchain for data storage." %}
-		{% set preview_image = "https://propol.is/static/img/propolis/discordp.png" %}
-		<title>{{ pagetitle }}</title>
-		<meta name="description" content="{{ pagedescription }}" />
+        {% set pagetitle = pagetitle + ' | Propolis - web3 Wiki' %}
+        {% set pagedescription = "Propolis is a wiki which utilizes the Hive blockchain for data storage." %}
+        {% set preview_image = "https://propol.is/static/img/propolis/discordp.png" %}
+        <title>{{ pagetitle }}</title>
+        <meta name="description" content="{{ pagedescription }}" />
 
-		<meta property="og:title" content="{{ pagetitle }}" />
-		<meta property="og:description" content="{{ pagedescription }}" />
-		<meta property="og:image" content="{{ preview_image }}" />
+        <meta property="og:title" content="{{ pagetitle }}" />
+        <meta property="og:description" content="{{ pagedescription }}" />
+        <meta property="og:image" content="{{ preview_image }}" />
 
-		<meta name="twitter:card" content="summary_large_image" />
-		<meta name="twitter:title" content="{{ pagetitle }}" />
-		<meta name="twitter:description" content="{{ pagedescription }}" />
-		<meta name="twitter:image" content="{{ preview_image }}" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="{{ pagetitle }}" />
+        <meta name="twitter:description" content="{{ pagedescription }}" />
+        <meta name="twitter:image" content="{{ preview_image }}" />
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="shortcut icon" href="{{ url_for('static', filename='img/propolis/propolisdiscord.png') }}">
