@@ -411,7 +411,7 @@ def source(article):
     
 @bp.route('/search/<search>')
 def search(search):
-    results = db_get_all('SELECT permlink FROM posts WHERE tsvector @@ websearch_to_tsquery(%s);',(search,))
+    results = db_get_all('SELECT permlink, ts_rank_cd(tsvector,websearch_to_tsquery(%s)) AS rank FROM posts WHERE tsvector @@ websearch_to_tsquery(%s) ORDER BY rank DESC;',(search,search,))
     return render_template('search.html',search=search,results=results,pagetitle='Search')
 
 @bp.route('/activity')
