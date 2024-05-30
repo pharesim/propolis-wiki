@@ -17,6 +17,7 @@ const editor = new Editor({
     plugins: [latexPlugin, tableMergedCell, uml],
     extendedAutolinks: true,
     hideModeSwitch: true,
+    usageStatistics: false
 });
 
 var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
