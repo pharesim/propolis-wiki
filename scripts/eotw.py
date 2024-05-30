@@ -71,7 +71,7 @@ for article, c in collection.items():
                 add['highest'] = highest
                 add[article] = c
     for i,s in enumerate(sorted):
-        if(highest > s['highest']):
+        if('highest' in s and highest > s['highest']):
             index = i+1
     sorted.insert(index,add)        
 sorted.reverse()
