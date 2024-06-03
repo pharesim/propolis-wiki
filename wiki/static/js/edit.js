@@ -114,6 +114,9 @@ function patchBody(permlink,newBody,title,topics,reason) {
         } else {
             new_body = newBody;
         }
+
+        console.log('new body', new_body);
+
         broadcastEdit(title, new_body, permlink, topics, reason);
     });
 }
@@ -174,8 +177,19 @@ btn.addEventListener('click', function() {
 
     let reason = 'Initial post';
     let body = editor.getMarkdown();
+
+    console.log('Body before', body)
+
     body = body.replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
-    body = body.replaceAll(/\[\[([^\]]+)\]\]/g, '[$1](/@'+wiki_user+'/$1)');
+    body = body.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
+        const capitalizeFirstLetter = (string) => {
+            return string.charAt(0).toUpperCase() + string.slice(1)
+        }
+        return `[${p1}](/@${wiki_user}/${p1.split(' ').map(capitalizeFirstLetter).join('-')})`
+    })
+
+    console.log('Body after', body)
+
 
     if(where == 'edit') {
         let reason = document.getElementById('reason').value;

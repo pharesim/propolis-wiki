@@ -149,7 +149,10 @@ function wikiLinkPlugin(context, options) {
                 if (node.literal.includes('[[')) {
                     return [
                         { type: 'html', content: node.literal.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
-                            return `<a href="/wiki/${p1.replaceAll(' ','-')}">${p1.replaceAll('-',' ')}</a>`
+                            const capitalizeFirstLetter = (string) => {
+                                return string.charAt(0).toUpperCase() + string.slice(1)
+                            }
+                            return `<a href="/wiki/${p1.split(' ').map(capitalizeFirstLetter).join('-')}">${p1.replaceAll('-',' ')}</a>`
                         })}
                     ];
                 } else {
