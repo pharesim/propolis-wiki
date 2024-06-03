@@ -1,6 +1,6 @@
 const { Editor } = toastui;
 
-const { tableMergedCell, uml, reference  } = Editor.plugin;
+const { tableMergedCell, uml, reference, wikiLink  } = Editor.plugin;
 
 const editor = new Editor({
     el: document.getElementById('editor'),
@@ -14,13 +14,13 @@ const editor = new Editor({
         ['code', 'codeblock'],],
     initialValue: document.getElementById('editor').innerHTML,
     initialEditType: 'markdown', // wysiwyg
-    plugins: [latexPlugin, tableMergedCell, uml],
+    plugins: [latexPlugin, tableMergedCell, uml, wikiLink],
     extendedAutolinks: true,
     hideModeSwitch: true,
     usageStatistics: false
 });
 
-var client = new dhive.Client(["https://api.hive.blog", "https://api.hivekings.com", "https://anyx.io", "https://api.openhive.network"]);
+var client = new dhive.Client(["https://api.hive.blog", "https://api.deathwing.me", "https://anyx.io", "https://api.openhive.network"]);
 
 var btn = document.getElementById('submit');
 function enableSubmit() {
@@ -173,7 +173,10 @@ btn.addEventListener('click', function() {
     topics = t;
 
     let reason = 'Initial post';
-    let body = editor.getMarkdown().replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
+    let body = editor.getMarkdown();
+    body = body.replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
+    body = body.replaceAll(/\[\[([^\]]+)\]\]/g, '[$1](/@'+wiki_user+'/$1)');
+
     if(where == 'edit') {
         let reason = document.getElementById('reason').value;
         body = patchBody(permlink, body, title, topics, reason);

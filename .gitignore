@@ -5,3 +5,4 @@ wiki/__pycache__/
 build/
 wiki.egg-info/
 .venv
+.DS_Store
