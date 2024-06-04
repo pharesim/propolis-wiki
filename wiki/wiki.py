@@ -132,7 +132,10 @@ def unformatWikiLink(link):
     return '-'.join(link.split(' ')).lower()
 
 def restoreSource(body):
-    return restoreReferences(wikifyInternalLinks(body))
+    new_body, codeblocks = extractCodeBlocks(body)
+    new_body = wikifyInternalLinks(new_body)
+    new_body = restoreReferences(new_body)
+    return restoreCodeBlocks(new_body,codeblocks)
 
 def restoreReferences(body):
     return body.replace('<ref>|Reference: ','<ref>')
