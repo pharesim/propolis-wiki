@@ -32,11 +32,6 @@ conn = psycopg2.connect(
     user=conf['DB_USERNAME'],
     password=conf['DB_PASSWORD'])
 
-client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']])
-acc = Account(conf['WIKI_USER'])
-hive = Blockchain()
-w = Wallet()
-
 def formatPostLink(permlink):
     split = permlink.split("-")
     if(len(split) > 1):
@@ -103,10 +98,17 @@ def send_to_waves(title,metadata,link,permlink):
 
 # start from block after wiki user account creation
 startblock = 0
+acc = Account(conf['WIKI_USER'])
 for op in acc.history(use_block_num=False,start=0,stop=1):
     startblock = op['block']
 
 while 1 == 1:
+
+    client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']])
+    acc = Account(conf['WIKI_USER'])
+    hive = Blockchain()
+    w = Wallet()
+
     cur = conn.cursor()
     try:
         ophistory = acc.history(only_ops=['comment'],start=startblock)
