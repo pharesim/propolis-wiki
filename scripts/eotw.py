@@ -1,6 +1,5 @@
 from beem.blockchain import Blockchain
 
-from pprint import pprint
 import datetime
 from configparser import ConfigParser
 from itertools import chain
@@ -30,7 +29,7 @@ exclude_users = ['pharesim','nikv','hivetrending']
 today = datetime.date.today()
 tots = today - datetime.timedelta(days=1)
 fromts = today - datetime.timedelta(days=8)
-pprint('from '+fromts.strftime('%Y-%m-%d %H:%M')+' to '+tots.strftime('%Y-%m-%d %H:%M'))
+print('from '+fromts.strftime('%Y-%m-%d %H:%M')+' to '+tots.strftime('%Y-%m-%d %H:%M'))
 cur.execute('SELECT trx_id, timestamp, permlink, author FROM comments WHERE timestamp >= %s AND timestamp <= %s ORDER BY timestamp ASC;',(fromts,tots,))
 edits = cur.fetchall()
 collection = {}
@@ -78,9 +77,9 @@ sorted.reverse()
 for s in sorted:
     for article, t in s.items():
         if article != 'highest':
-            txt = 'Article: '+article
+            txt = 'Article: https://propol.is/wiki/'+article
             for author, u in t.items():
                 if author not in exclude_users:
                     txt += ' Author: '+author
                     txt += ' '+str(u['edits'])+' characters in '+str(u['count'])+' edits'
-            pprint(txt)
+            print(txt)
