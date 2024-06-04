@@ -133,14 +133,14 @@ def unformatWikiLink(link):
 
 def restoreSource(body):
     new_body, codeblocks = extractCodeBlocks(body)
-    new_body = wikifyInternalLinks(new_body)
-    new_body = restoreReferences(new_body)
-    return restoreCodeBlocks(new_body,codeblocks)
+    new_body = restoreInternalLinks(new_body)
+    new_body = restoreCodeBlocks(new_body,codeblocks)
+    return restoreReferences(new_body)
 
 def restoreReferences(body):
     return body.replace('<ref>|Reference: ','<ref>')
 
-def wikifyInternalLinks(body):
+def restoreInternalLinks(body):
     # remove markdown links and replace with [[]]
     #body = body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/')
     # TODO: allow different capitalization for the link
