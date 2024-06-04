@@ -289,7 +289,7 @@ def getRelated(new_body):
 
     for token in tokenized[1:]:
         link, rest = token.split(']]')
-        new_body += '<span title="%s" %s>[[%s]]</span>' % (link, ' class="article404"' if existsDict[link] < 1 else '', formatWikiLink(link))
+        new_body += '<span title="%s" %s>[[%s]]</span>' % (link, ' class="article404"' if existsDict[link] < 1 else '', link)
 
         new_body += rest
 
