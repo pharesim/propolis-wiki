@@ -129,7 +129,7 @@ def unformatPostLink(hive_post):
     return hive_post
 
 def unformatWikiLink(link):
-    return unformatPostLink(link)
+    return '-'.join(link.split(' ')).lower()
 
 def restoreSource(body):
     return restoreReferences(wikifyInternalLinks(body))
