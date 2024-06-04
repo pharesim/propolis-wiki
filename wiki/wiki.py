@@ -5,6 +5,7 @@ from werkzeug.exceptions import abort
 
 import time
 import json
+import re
 
 import psycopg2
 
@@ -89,6 +90,19 @@ def formatPostLink(permlink):
         permlink = formatPostLinkSegment(permlink)
     return permlink
 
+def formatWikiLink(permlink):
+    permlink = permlink.replace('(','').replace(')','').replace(',','').replace('+','')
+    split = permlink.split("-")
+    if(len(split) > 1):
+        permlink = ''
+        for i, val in enumerate(split):
+            permlink += formatPostLinkSegment(val)
+            if(i+1 < len(split)):
+                permlink += '-'
+    else:
+        permlink = formatPostLinkSegment(permlink)
+    return permlink
+
 def formatPostLinkSegment(segment):
     split = segment.split(':')
     if(len(split) > 1):
@@ -114,6 +128,9 @@ def unformatPostLink(hive_post):
             hive_post += '-'
     return hive_post
 
+def unformatWikiLink(link):
+    return '-'.join(link.split(' ')).lower()
+
 def restoreSource(body):
     return restoreReferences(wikifyInternalLinks(body))
 
@@ -121,7 +138,14 @@ def restoreReferences(body):
     return body.replace('<ref>|Reference: ','<ref>')
 
 def wikifyInternalLinks(body):
-    return body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/').replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
+    # remove markdown links and replace with [[]]
+    #body = body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/')
+    # TODO: allow different capitalization for the link
+    body = re.sub(r'\[([^\(\)\[\]]+)\]\(/@%s/([^\(\)\[\]]+)\)' % current_app.config['WIKI_USER'],
+                  r'[[\g<1>]]'.replace('-',' '),
+                  body)
+    body = body.replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
+    return body
 
 def extractCodeBlocks(body):
     new_body = ''
@@ -231,51 +255,44 @@ def wikifyBody(body):
     related, new_body = getRelated(new_body)
     if len(related) > 0:
         new_body += "\n## Related Articles\n"
-        for val in related:
-            new_body += '<span title="'+val[2]+'"'
-            if(val[1] < 1):
+        for (rel,exists,title) in related:
+            new_body += '<span title="%s"' % title
+            if(exists < 1):
                 new_body += ' class="article404"'
-            new_body += '>'+val[0]+"</span>\n"
+            new_body += '>%s</span>\n' % rel
     
     new_body = wikifyHeaders(new_body)
     return restoreCodeBlocks(new_body,codeblocks)
 
 def getRelated(new_body):
     related = []
-    splitters = ["](/wiki/",")","["]
-    relsplit = new_body.split(splitters[0])
-    if(len(relsplit) > 1):
-        new_body = ''
-        for i, val in enumerate(relsplit):
-            relrest = val.split(splitters[1])
-            if(i > 0):
-                link = relrest[0]
-                rel = splitters[2]+title+splitters[0]+formatPostLink(link)+splitters[1]
-                exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(unformatPostLink(link),))
-                tuple = (rel,exists,title)      
-                if ':' not in link and tuple not in related:                         
-                    related.append(tuple)
-                new_body += splitters[0]
-            relbef = val.split(splitters[2])
-            split = relbef[0].split(splitters[1],1)
-            link = split[0]
-            if(len(split) == 1):
-                new_body += relbef[0]
-            else:
-                new_body += link+splitters[1]+split[1]
-            if(len(relbef) > 1):
-                for j, v in enumerate(relbef):
-                    if j > 0:
-                        title = v
-                        new_body += splitters[2]+title
-    if len(related) > 0:
-        for val in related:
-            string = '<span title="'+val[2]+'" class="'
-            if(val[1] < 1):
-                string += 'article404'
-            else:
-                string += 'articleExists'
-            new_body = new_body.replace(val[0],string+'">'+val[0]+'</span>')
+    existsDict = {}
+
+    # create list of related links
+    links = re.findall("\[\[([^\]]+)\]\]", new_body)
+    for link in links:
+        rel = '[[%s]]' % formatWikiLink(link)
+        exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(unformatWikiLink(link),))
+        existsDict[link] = exists
+
+        title = link
+        tuple = (rel,exists,title)
+        if ':' not in link and tuple not in related:
+            related.append(tuple)
+
+    if not links:
+        return related, new_body
+
+    # replace links in body
+    tokenized = new_body.split('[[')
+    new_body = tokenized[0]
+
+    for token in tokenized[1:]:
+        link, rest = token.split(']]')
+        new_body += '<span title="%s" %s>[[%s]]</span>' % (link, ' class="article404"' if existsDict[link] < 1 else '', link)
+
+        new_body += rest
+
     return related, new_body
     
 def toHtmlId(string):

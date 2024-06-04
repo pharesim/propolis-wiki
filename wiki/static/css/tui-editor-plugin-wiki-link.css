@@ -1,0 +1,10 @@
+/*!
+ * TOAST UI Editor : Wiki Link Plugin
+ * @version 1.0.0 | Monday May 27th 2024
+ * @author
+ * @license ISC
+ */
+
+.toastui-editor-toolbar-icons.link.wikiLink {
+	background-color: #E31337;
+}
