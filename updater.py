@@ -98,19 +98,21 @@ def send_to_waves(title,metadata,link,permlink):
 
 # start from block after wiki user account creation
 startblock = 0
-acc = Account(conf['WIKI_USER'])
-for op in acc.history(use_block_num=False,start=0,stop=1):
-    startblock = op['block']
+while startblock == 0:
+    try:
+        acc = Account(conf['WIKI_USER'])
+        for op in acc.history(use_block_num=False,start=0,stop=1):
+            startblock = op['block']
+    except:
+        startblock = 0
 
 while 1 == 1:
-
-    client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']])
-    acc = Account(conf['WIKI_USER'])
-    hive = Blockchain()
-    w = Wallet()
-
     cur = conn.cursor()
     try:
+        client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']])
+        acc = Account(conf['WIKI_USER'])
+        hive = Blockchain()
+        w = Wallet()
         ophistory = acc.history(only_ops=['comment'],start=startblock)
     except:
         ophistory = {}
