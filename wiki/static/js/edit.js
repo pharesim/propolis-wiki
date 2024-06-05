@@ -174,15 +174,47 @@ btn.addEventListener('click', function() {
     topics = t;
 
     let reason = 'Initial post';
-    let body = editor.getMarkdown();
 
-    body = body.replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
-    body = body.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
-        const capitalizeFirstLetter = (string) => {
-            return string.charAt(0).toUpperCase() + string.slice(1)
+    const extractCodeBlocks = (body) => {
+        const codeBlocks = [...body.matchAll(/```([^`]+)```/g)];
+
+        body = body.replaceAll(/```([^`]+)```/g, '``````');
+        return [body,codeBlocks];
+    }
+
+    const restoreCodeBlocks = (body, codeBlocks) => {
+        for (const codeBlock of codeBlocks) {
+            body = body.replace('``````', codeBlock[0]);
         }
-        return `[${p1}](/@${wiki_user}/${p1.split(' ').map(capitalizeFirstLetter).join('-')})`
-    })
+        return body;
+    }
+
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1)
+    }
+
+    const replaceInternalLinks = (body) => {
+        body = body.replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
+        body = body.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
+            let link = p1.replace('|','#')
+            return `[${link}](/@${wiki_user}/${link.split(' ').map(capitalizeFirstLetter).join('-')})`
+        })
+
+        return body
+    }
+
+    // prepare post for display on all Hive front-ends
+    let body,codeBlocks;
+
+    // remove code blocks from body first, they should not be modified
+    [body,codeBlocks] = extractCodeBlocks(editor.getMarkdown());
+    console.log(body,codeBlocks);
+
+    body = replaceInternalLinks(body);
+
+    // restore the unmodified code blocks
+    body = restoreCodeBlocks(body, codeBlocks);
+    console.log('body after', body);
 
     if(where == 'edit') {
         let reason = document.getElementById('reason').value;
