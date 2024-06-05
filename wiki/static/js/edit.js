@@ -197,7 +197,12 @@ btn.addEventListener('click', function() {
         body = body.replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
         body = body.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
             let link = p1;
-            return `[${link}](/@${wiki_user}/${link.split(' ').map(capitalizeFirstLetter).join('-')})`
+            const hasFragment = link.includes('|')
+            const linkFragment = hasFragment ? '#' + link.split('|')[1].replaceAll(' ','') : ''
+            if (hasFragment) {
+                link = link.split('|')[0]
+            }
+            return `[${link}](/@${wiki_user}/${link.split(' ').map(capitalizeFirstLetter).join('-')}${linkFragment})`
         })
 
         return body
