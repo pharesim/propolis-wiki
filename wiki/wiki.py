@@ -248,6 +248,9 @@ def wikifyHeaders(body):
         new_body = headers[0]+contents+"\n\n"+'## '+z[0]+"\n"+z[1]
     return new_body
 
+def wikifyHiveLinks(body):
+    return body.replace('](/@', ']('+current_app.config['HIVE_INTERFACE']+'/@')
+
 def wikifyBody(body):
     new_body, codeblocks = extractCodeBlocks(restoreSource(body))
 
@@ -263,6 +266,9 @@ def wikifyBody(body):
             new_body += '>%s</span>\n' % rel
     
     new_body = wikifyHeaders(new_body)
+
+    new_body = wikifyHiveLinks(new_body)
+
     return restoreCodeBlocks(new_body,codeblocks)
 
 def getRelated(new_body):
