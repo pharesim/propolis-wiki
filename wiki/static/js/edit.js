@@ -196,7 +196,7 @@ btn.addEventListener('click', function() {
     const replaceInternalLinks = (body) => {
         body = body.replaceAll('](/wiki/','](/@'+wiki_user+'/').replaceAll('<a href="/wiki/','<a href="/@'+wiki_user+'/').replaceAll('<ref>|Reference: ','<ref>').replaceAll('<ref>','<ref>|Reference: ');
         body = body.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
-            let link = p1.replace('|','#')
+            let link = p1;
             return `[${link}](/@${wiki_user}/${link.split(' ').map(capitalizeFirstLetter).join('-')})`
         })
 
