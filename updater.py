@@ -96,11 +96,13 @@ def send_to_waves(title,metadata,link,permlink):
             c.reply(text, title=title+' edited', author=conf['WIKI_USER'], meta=None)
             time.sleep(5)
 
+client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']], node="https://api.deathwing.me/")
+
 # start from block after wiki user account creation
 startblock = 0
 while startblock == 0:
     try:
-        acc = Account(conf['WIKI_USER'])
+        acc = Account(conf['WIKI_USER'], blockchain_instance=client)
         for op in acc.history(use_block_num=False,start=0,stop=1):
             startblock = op['block']
     except:
@@ -109,10 +111,10 @@ while startblock == 0:
 while 1 == 1:
     cur = conn.cursor()
     try:
-        client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']])
-        acc = Account(conf['WIKI_USER'])
-        hive = Blockchain()
-        w = Wallet()
+        
+        acc = Account(conf['WIKI_USER'], blockchain_instance=client)
+        hive = Blockchain(blockchain_instance=client)
+        w = Wallet(blockchain_instance=client)
         ophistory = acc.history(only_ops=['comment'],start=startblock)
     except:
         ophistory = {}
@@ -148,7 +150,7 @@ while 1 == 1:
             if(s == False):
                 pprint("User in metadata isn't signer. Removing signer's access.")
                 webhook_send("User in metadata didn't sign the transaction. Removing authorization for "+signer)
-                account = Account(conf['WIKI_USER'])
+                account = Account(conf['WIKI_USER'], blockchain_instance=client)
                 for i, auth in enumerate(account["posting"]["account_auths"]):
                     if(auth[0] == signer):
                         account['posting']['account_auths'].pop(i)
@@ -167,7 +169,7 @@ while 1 == 1:
             post = {}
             while post == {}:
                 try:
-                    post = Comment(conf['WIKI_USER']+"/"+op['permlink'])
+                    post = Comment(conf['WIKI_USER']+"/"+op['permlink'], blockchain_instance=client)
                 except:
                     time.sleep(1)
             tags = metadata['tags']

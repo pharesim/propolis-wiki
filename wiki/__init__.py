@@ -19,7 +19,8 @@ def create_app():
         SESSION_TYPE='redis',
         SESSION_REDIS='redis://127.0.0.1:6379',
         SESSION_USE_SIGNER=True,
-        DB_HOSTNAME = 'localhost',
+        DB_HOSTNAME='localhost',
+        HIVE_INTERFACE="https://hive.blog",
         START_PAGE='Welcome-To-Propolis-Wiki',
         EDIT_GUIDELINES='How-To-Edit-Propolis-Wiki'
     )

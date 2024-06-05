@@ -29,6 +29,7 @@ edit config file
 ```
 If you want the updater script to post to Discord, set DISCORD_WEBHOOK to a working link.
 Edits can also be announced to ecency.waves and/or leothreads, set the respective accounts in WAVES_ACCOUNT and/or LEOTHREADS_ACCOUNT to activate.
+The default hive interface for external hive links is https://hive.blog, you can change it by setting HIVE_INTERFACE
 
 ### Database
 
