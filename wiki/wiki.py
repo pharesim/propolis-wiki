@@ -142,8 +142,6 @@ def restoreReferences(body):
 
 def restoreInternalLinks(body):
     # remove markdown links and replace with [[]]
-    #body = body.replace('](/@'+current_app.config['WIKI_USER']+'/','](/wiki/')
-    # TODO: allow different capitalization for the link
     body = re.sub(r'\[([^\(\)\[\]]+)\]\(/@%s/([^\(\)\[\]]+)\)' % current_app.config['WIKI_USER'],
                   r'[[\g<1>]]'.replace('-',' '),
                   body)

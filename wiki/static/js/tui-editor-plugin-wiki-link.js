@@ -146,13 +146,15 @@ function wikiLinkPlugin(context, options) {
         ],
         toHTMLRenderers: {
             text(node, context) {
+                const capitalizeFirstLetter = (string) => {
+                    return string.charAt(0).toUpperCase() + string.slice(1)
+                }
+
                 if (node.literal.includes('[[')) {
                     return [
                         { type: 'html', content: node.literal.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
-                            const capitalizeFirstLetter = (string) => {
-                                return string.charAt(0).toUpperCase() + string.slice(1)
-                            }
-                            return `<a href="/wiki/${p1.split(' ').map(capitalizeFirstLetter).join('-')}">${p1.replaceAll('-',' ')}</a>`
+                            let link = p1;
+                            return `<a href="/wiki/${link.split(' ').map(capitalizeFirstLetter).join('-')}">${link.replaceAll('-',' ')}</a>`
                         })}
                     ];
                 } else {
