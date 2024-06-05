@@ -208,13 +208,11 @@ btn.addEventListener('click', function() {
 
     // remove code blocks from body first, they should not be modified
     [body,codeBlocks] = extractCodeBlocks(editor.getMarkdown());
-    console.log(body,codeBlocks);
 
     body = replaceInternalLinks(body);
 
     // restore the unmodified code blocks
     body = restoreCodeBlocks(body, codeBlocks);
-    console.log('body after', body);
 
     if(where == 'edit') {
         let reason = document.getElementById('reason').value;
