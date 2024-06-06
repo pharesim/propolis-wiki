@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template
 from flask_session import Session
 
 import redis
@@ -28,6 +28,10 @@ def create_app():
     app.config.from_pyfile('config.py')
     app.config['SESSION_REDIS'] = redis.from_url(app.config['SESSION_REDIS'])
     app.secret_key = app.config['SECRET_KEY']
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template("404.html")
 
     try:
         os.makedirs(app.instance_path)
