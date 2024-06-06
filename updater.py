@@ -99,24 +99,23 @@ def send_to_waves(title,metadata,link,permlink):
 client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']], node="https://api.deathwing.me/")
 
 # start from block after wiki user account creation
-startblock = 0
-while startblock == 0:
+startblock = 1
+while startblock == 1:
     try:
         acc = Account(conf['WIKI_USER'], blockchain_instance=client)
         for op in acc.history(use_block_num=False,start=0,stop=1):
             startblock = op['block']
     except:
-        startblock = 0
+        startblock = 1
 
 while 1 == 1:
     cur = conn.cursor()
     try:
-        
         acc = Account(conf['WIKI_USER'], blockchain_instance=client)
         hive = Blockchain(blockchain_instance=client)
         w = Wallet(blockchain_instance=client)
-        ophistory = acc.history(only_ops=['comment'],start=startblock)
-    except:
+        ophistory = acc.history(only_ops=['comment'],start=startblock-1)
+    except Exception as e:
         ophistory = {}
 
     for op in ophistory:
@@ -125,7 +124,6 @@ while 1 == 1:
             exists = cur.fetchall()[0]
         except:
             exists = False
-
         # Only process comments that don't exist yet, were authored by the wiki user in the category wiki
         if(exists == False and op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
             pprint('Processing transaction '+op['trx_id'])

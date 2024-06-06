@@ -25,6 +25,7 @@ def get_db_connection():
                             database=current_app.config['DATABASE'],
                             user=current_app.config['DB_USERNAME'],
                             password=current_app.config['DB_PASSWORD'])
+    conn.autocommit = True
     return conn
 
 def db_get_all(query,data = ()):
@@ -513,8 +514,9 @@ def compare(article, revision_1, revision_2):
     if(article_f != article):
         return redirect(url_for('wiki.compare', article=article_f, revision_1=revision_1, revision_2=revision_2),301)  
     permlink = unformatPostLink(article)
-    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
-    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']'))))
+    body_1 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_1).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']').replace('\\','\\\\'))))
+    body_2 = Markup(xssEscape(replaceLinebreaks(getRevisionBody(permlink,revision_2).replace("'","|0x27|").replace('<ref>','[* ').replace('</ref>',']').replace('\\','\\\\'))))
+
     data_1 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_1,))[0]
     data_2 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_2,))[0]
     try:
