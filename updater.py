@@ -212,8 +212,8 @@ while 1 == 1:
                     pprint(error)
 
             startblock = op['block']
-    except:
-        pass
+    except Exception as error:
+        pprint(error)
 
     conn.commit()
     cur.close()
