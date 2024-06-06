@@ -99,121 +99,116 @@ def send_to_waves(title,metadata,link,permlink):
 client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']], node="https://api.deathwing.me/")
 
 # start from block after wiki user account creation
-startblock = 0
-while startblock == 0:
+startblock = 1
+while startblock == 1:
     try:
         acc = Account(conf['WIKI_USER'], blockchain_instance=client)
         for op in acc.history(use_block_num=False,start=0,stop=1):
             startblock = op['block']
     except:
-        startblock = 0
+        startblock = 1
 
 while 1 == 1:
+    acc = Account(conf['WIKI_USER'], blockchain_instance=client)
+    hive = Blockchain(blockchain_instance=client)
+    w = Wallet(blockchain_instance=client)
     cur = conn.cursor()
     try:
-        
-        acc = Account(conf['WIKI_USER'], blockchain_instance=client)
-        hive = Blockchain(blockchain_instance=client)
-        w = Wallet(blockchain_instance=client)
-        ophistory = acc.history(only_ops=['comment'],start=startblock)
-    except:
+        ophistory = acc.history(only_ops=['comment'],start=startblock-1)
+    except Exception as e:
         ophistory = {}
 
-    try:
-        for op in ophistory:
-            cur.execute('SELECT trx_id FROM comments WHERE trx_id=%s',(op['trx_id'],))
-            try: 
-                exists = cur.fetchall()[0]
-            except:
-                exists = False
+    for op in ophistory:
+        cur.execute('SELECT trx_id FROM comments WHERE trx_id=%s',(op['trx_id'],))
+        try: 
+            exists = cur.fetchall()[0]
+        except:
+            exists = False
+        # Only process comments that don't exist yet, were authored by the wiki user in the category wiki
+        if(exists == False and op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
+            pprint('Processing transaction '+op['trx_id'])
 
-            # Only process comments that don't exist yet, were authored by the wiki user in the category wiki
-            if(exists == False and op['type'] == 'comment' and op['author'] == conf['WIKI_USER'] and op['parent_permlink'] == 'wiki' and op['block'] != startblock):
-                pprint('Processing transaction '+op['trx_id'])
+            metadata = json.loads(op['json_metadata'])
+            if 'appdata' not in metadata or 'user' not in metadata['appdata']:
+                metadata['appdata']['user'] = None
 
-                metadata = json.loads(op['json_metadata'])
-                if 'appdata' not in metadata or 'user' not in metadata['appdata']:
-                    metadata['appdata']['user'] = None
-
-                transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
-                signer = ''
-                for key in transaction.verify(chain='HIVE2'):
-                    owner = w.getAccountFromPublicKey('STM'+str(Base58(data=key)))
-                    if(owner != None):
-                        signer = owner
-                try:
-                    if(signer == metadata['appdata']['user']):
-                        s = True
-                    else:
-                        s = False
-                except:
+            transaction = Signed_Transaction(hive.get_transaction(op['trx_id']))
+            signer = ''
+            for key in transaction.verify(chain='HIVE2'):
+                owner = w.getAccountFromPublicKey('STM'+str(Base58(data=key)))
+                if(owner != None):
+                    signer = owner
+            try:
+                if(signer == metadata['appdata']['user']):
+                    s = True
+                else:
                     s = False
-                if(s == False):
-                    pprint("User in metadata isn't signer. Removing signer's access.")
-                    webhook_send("User in metadata didn't sign the transaction. Removing authorization for "+signer)
-                    account = Account(conf['WIKI_USER'], blockchain_instance=client)
-                    for i, auth in enumerate(account["posting"]["account_auths"]):
-                        if(auth[0] == signer):
-                            account['posting']['account_auths'].pop(i)
-                            op = operations.Account_update(**{"account": conf['WIKI_USER'],
-                                "posting": account["posting"],
-                                "memo_key": account["memo_key"],
-                                "json_metadata": account["json_metadata"]})
-                            tx = TransactionBuilder()
-                            tx.appendOps(op)
-                            tx.appendWif(conf['ACTIVE_KEY'])
-                            tx.sign()
-                            tx.broadcast()
-                            break
-                    metadata['appdata']['user'] = None
-                
-                post = {}
-                while post == {}:
-                    try:
-                        post = Comment(conf['WIKI_USER']+"/"+op['permlink'], blockchain_instance=client)
-                    except:
-                        time.sleep(1)
-                tags = metadata['tags']
-                abstract = ''
-                body = post['body']
-                split = post['body'].split("\n## ",1)
-                if(len(split) > 1):
-                    abstract = split[0]
-                    body = split[1]
-                cur.execute('INSERT INTO posts (permlink, tsvector)'
-                    " VALUES (%s, setweight(to_tsvector(coalesce(%s,'')), 'A') || setweight(to_tsvector(coalesce(%s,'')), 'B') || setweight(to_tsvector(coalesce(%s,'')), 'C') || setweight(to_tsvector(coalesce(%s,'')), 'D'))"
-                    ' ON CONFLICT(permlink) DO UPDATE SET tsvector = EXCLUDED.tsvector',
-                    (op['permlink'], op['title'], ' '.join(tags), abstract, body))
-                cur.execute('INSERT INTO comments (trx_id, permlink, timestamp, author)'
-                    ' VALUES (%s, %s, %s, %s)'
-                    ' ON CONFLICT(trx_id) DO NOTHING',
-                    (op['trx_id'],op['permlink'],op['timestamp'],metadata['appdata']['user']))
-                cur.execute('DELETE FROM categories_posts WHERE permlink=%s',
-                    (op['permlink'],))
-                for tag in tags:
-                    if(tag != 'wiki' and tag != ''):
-                        cur.execute('INSERT INTO categories (category)'
-                            ' VALUES (%s)'
-                            ' ON CONFLICT(category) DO NOTHING',
-                            (tag,))
-                        cur.execute('INSERT INTO categories_posts (permlink, category)'
-                            ' VALUES (%s,%s)',
-                            (op['permlink'],tag))
-                        
-                webhook_text = 'New edit by '+metadata['appdata']['user']+' on article '+op['title']
-                if 'reason' in metadata['appdata']:
-                    webhook_text += ' ('+metadata['appdata']['reason']+')'
-                rev_link = 'https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
-                webhook_text += ' '+rev_link
+            except:
+                s = False
+            if(s == False):
+                pprint("User in metadata isn't signer. Removing signer's access.")
+                webhook_send("User in metadata didn't sign the transaction. Removing authorization for "+signer)
+                account = Account(conf['WIKI_USER'], blockchain_instance=client)
+                for i, auth in enumerate(account["posting"]["account_auths"]):
+                    if(auth[0] == signer):
+                        account['posting']['account_auths'].pop(i)
+                        op = operations.Account_update(**{"account": conf['WIKI_USER'],
+                            "posting": account["posting"],
+                            "memo_key": account["memo_key"],
+                            "json_metadata": account["json_metadata"]})
+                        tx = TransactionBuilder()
+                        tx.appendOps(op)
+                        tx.appendWif(conf['ACTIVE_KEY'])
+                        tx.sign()
+                        tx.broadcast()
+                        break
+                metadata['appdata']['user'] = None
+            
+            post = {}
+            while post == {}:
                 try:
-                    webhook_send(webhook_text)
-                    send_to_waves(op['title'],metadata,rev_link,op['permlink'])
-                except Exception as error:
-                    pprint(error)
+                    post = Comment(conf['WIKI_USER']+"/"+op['permlink'], blockchain_instance=client)
+                except:
+                    time.sleep(1)
+            tags = metadata['tags']
+            abstract = ''
+            body = post['body']
+            split = post['body'].split("\n## ",1)
+            if(len(split) > 1):
+                abstract = split[0]
+                body = split[1]
+            cur.execute('INSERT INTO posts (permlink, tsvector)'
+                " VALUES (%s, setweight(to_tsvector(coalesce(%s,'')), 'A') || setweight(to_tsvector(coalesce(%s,'')), 'B') || setweight(to_tsvector(coalesce(%s,'')), 'C') || setweight(to_tsvector(coalesce(%s,'')), 'D'))"
+                ' ON CONFLICT(permlink) DO UPDATE SET tsvector = EXCLUDED.tsvector',
+                (op['permlink'], op['title'], ' '.join(tags), abstract, body))
+            cur.execute('INSERT INTO comments (trx_id, permlink, timestamp, author)'
+                ' VALUES (%s, %s, %s, %s)'
+                ' ON CONFLICT(trx_id) DO NOTHING',
+                (op['trx_id'],op['permlink'],op['timestamp'],metadata['appdata']['user']))
+            cur.execute('DELETE FROM categories_posts WHERE permlink=%s',
+                (op['permlink'],))
+            for tag in tags:
+                if(tag != 'wiki' and tag != ''):
+                    cur.execute('INSERT INTO categories (category)'
+                        ' VALUES (%s)'
+                        ' ON CONFLICT(category) DO NOTHING',
+                        (tag,))
+                    cur.execute('INSERT INTO categories_posts (permlink, category)'
+                        ' VALUES (%s,%s)',
+                        (op['permlink'],tag))
+                    
+            webhook_text = 'New edit by '+metadata['appdata']['user']+' on article '+op['title']
+            if 'reason' in metadata['appdata']:
+                webhook_text += ' ('+metadata['appdata']['reason']+')'
+            rev_link = 'https://propol.is/history/'+formatPostLink(op['permlink'])+'/revision/'+op['trx_id']
+            webhook_text += ' '+rev_link
+            try:
+                webhook_send(webhook_text)
+                send_to_waves(op['title'],metadata,rev_link,op['permlink'])
+            except Exception as error:
+                pprint(error)
 
-            startblock = op['block']
-    except Exception as error:
-        pprint(error)
+        startblock = op['block']
 
     conn.commit()
     cur.close()
