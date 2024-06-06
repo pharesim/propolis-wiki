@@ -109,11 +109,11 @@ while startblock == 1:
         startblock = 1
 
 while 1 == 1:
-    acc = Account(conf['WIKI_USER'], blockchain_instance=client)
-    hive = Blockchain(blockchain_instance=client)
-    w = Wallet(blockchain_instance=client)
     cur = conn.cursor()
     try:
+        acc = Account(conf['WIKI_USER'], blockchain_instance=client)
+        hive = Blockchain(blockchain_instance=client)
+        w = Wallet(blockchain_instance=client)
         ophistory = acc.history(only_ops=['comment'],start=startblock-1)
     except Exception as e:
         ophistory = {}

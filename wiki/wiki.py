@@ -25,6 +25,7 @@ def get_db_connection():
                             database=current_app.config['DATABASE'],
                             user=current_app.config['DB_USERNAME'],
                             password=current_app.config['DB_PASSWORD'])
+    conn.autocommit = True
     return conn
 
 def db_get_all(query,data = ()):
