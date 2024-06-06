@@ -359,6 +359,13 @@ def before_request():
                 userlevel = key[1]
         session['userlevel'] = userlevel
 
+@bp.after_request
+def add_header(response):
+    # response.cache_control.no_store = True
+    if 'Cache-Control' not in response.headers:
+        response.headers['Cache-Control'] = 'no-store'
+    return response
+
 @bp.route('/wiki')
 def redirect_home():
     return redirect('/',301)
