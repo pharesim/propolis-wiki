@@ -142,9 +142,22 @@ def restoreReferences(body):
 
 def restoreInternalLinks(body):
     # remove markdown links and replace with [[]]
-    body = re.sub(r'\[([^\(\)\[\]]+)\]\(/@%s/([^\(\)\[\]]+)\)' % current_app.config['WIKI_USER'],
-                  r'[[\g<1>]]'.replace('-',' '),
-                  body)
+
+    # if [linkText](linkURL) linkText != linkURL, leave it as markdown
+    # to give more flexibility to editors to customize links
+
+    links = re.findall(r'\[([^\[\]]+)\]\(/@%s/([^\(\)]+)\)' % current_app.config['WIKI_USER'], body)
+
+    for link in links:
+        if link[0].lower() != link[1].lower().replace('-',' '):
+            # for links that deviate from wiki link format
+            # just replace the @WIKI_USER part of the link
+            body = body.replace('[%s](/@%s/' % (link[0],current_app.config['WIKI_USER']),'[%s](/wiki/' % link[0])
+            continue
+        else:
+            # standard ingernal links convert to [[]] wiki links
+            body = re.sub(r'\[%s\]\(\/@%s\/%s\)' % (link[0], current_app.config['WIKI_USER'], link[1]), '[[%s]]' % link[0], body)
+
     body = body.replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
     return body
 
