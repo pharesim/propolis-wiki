@@ -305,11 +305,12 @@ def getRelated(new_body):
     # create list of related links
     links = re.findall("\[\[([^\]]+)\]\]", new_body)
     for link in links:
-        rel = '[[%s]]' % formatWikiLink(link)
-        exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(unformatWikiLink(link),))
+        linkNoFragment = link.split('|')[0]
+        rel = '[[%s]]' % formatWikiLink(linkNoFragment)
+        exists = db_count('SELECT count(permlink) FROM posts WHERE permlink=%s',(unformatWikiLink(linkNoFragment),))
         existsDict[link] = exists
 
-        title = link
+        title = linkNoFragment.lower()
         tuple = (rel,exists,title)
         if ':' not in link and tuple not in related:
             related.append(tuple)
