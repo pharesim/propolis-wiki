@@ -146,9 +146,7 @@ def restoreInternalLinks(body):
 
     # if [linkText](linkURL) linkText != linkURL, leave it as markdown
     # to give more flexibility to editors to customize links
-
-    body = body.replace('[Propolis Wiki](/@propolis.eng/Propolis-Wiki#EditofTheWeekandLogoContests)','[Propolis Wiki|Edit of The Week and Logo Contests](/@propolis.eng/Propolis-Wiki#EditofTheWeekandLogoContests)')
-
+    
     links = re.findall(r'\[([^\[\]]+)\]\(/@%s/([^\(\)]+)\)' % current_app.config['WIKI_USER'], body)
 
     for link in links:
