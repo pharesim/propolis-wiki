@@ -146,7 +146,7 @@ def restoreInternalLinks(body):
 
     # if [linkText](linkURL) linkText != linkURL, leave it as markdown
     # to give more flexibility to editors to customize links
-    
+
     links = re.findall(r'\[([^\[\]]+)\]\(/@%s/([^\(\)]+)\)' % current_app.config['WIKI_USER'], body)
 
     for link in links:
