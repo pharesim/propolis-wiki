@@ -150,14 +150,27 @@ def restoreInternalLinks(body):
     links = re.findall(r'\[([^\[\]]+)\]\(/@%s/([^\(\)]+)\)' % current_app.config['WIKI_USER'], body)
 
     for link in links:
-        if link[0].lower() != link[1].lower().replace('-',' '):
+        hasFragment = '#' in link[1] and '|' in link[0]
+        
+        fragmentText = ''
+        fragmentLink = ''
+        textNoFragment = link[0].lower().split('|')[0]
+        linkNoFragment = link[1].lower().split('#')[0].replace('-',' ')
+        if hasFragment:
+            fragmentText = link[0].lower().split('|')[1].replace(' ','')
+            fragmentLink = link[1].lower().split('#')[1]
+
+        if not hasFragment and link[0].lower() == link[1].lower().replace('-',' '):
+            # standard internal links convert to [[]] wiki links
+            body = body.replace('[%s](/@%s/%s)' % (link[0], current_app.config['WIKI_USER'], link[1]), '[[%s]]' % link[0])
+        elif hasFragment and fragmentText == fragmentLink and textNoFragment == linkNoFragment:
+            # internal links with content fragment
+            body = body.replace('[%s](/@%s/%s)' % (link[0], current_app.config['WIKI_USER'], link[1]), '[[%s]]' % (link[0]))
+        else:
+            # fall back to normal Markdown link
             # for links that deviate from wiki link format
             # just replace the @WIKI_USER part of the link
             body = body.replace('[%s](/@%s/' % (link[0],current_app.config['WIKI_USER']),'[%s](/wiki/' % link[0])
-            continue
-        else:
-            # standard ingernal links convert to [[]] wiki links
-            body = re.sub(r'\[%s\]\(\/@%s\/%s\)' % (link[0], current_app.config['WIKI_USER'], link[1]), '[[%s]]' % link[0], body)
 
     body = body.replace('<a href="/@'+current_app.config['WIKI_USER']+'/','<a href="/wiki/')
     return body

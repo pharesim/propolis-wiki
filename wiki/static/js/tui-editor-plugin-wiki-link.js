@@ -153,18 +153,18 @@ function wikiLinkPlugin(context, options) {
                 if (node.literal.includes('[[')) {
                     return [
                         { type: 'html', content: node.literal.replaceAll(/\[\[([^\]]+)\]\]/g, (match, p1, offset, string, groups) => {
-                            let link = p1;
+                            let link = p1.trim();
                             const hasFragment = link.includes('|')
 
                             let linkFragment = hasFragment ? link.split('|')[1] : '';
-                            let linkText = link.split('|')[0].replaceAll('-',' ')
+                            let linkText = link.split('|')[0].replaceAll('-',' ').trim()
 
                             if (hasFragment) {
                                 linkText = `${linkText} (${linkFragment})`
                                 linkFragment = `#${linkFragment.replaceAll(' ','')}`
                             }
 
-                            link =  link.split('|')[0].split(' ').map(capitalizeFirstLetter).join('-') + linkFragment;
+                            link =  link.split('|')[0].trim().split(' ').map(capitalizeFirstLetter).join('-') + linkFragment;
                             return `<a href="/wiki/${link}">${linkText}</a>`
                         })}
                     ];
