@@ -64,7 +64,7 @@ def xssEscape(string):
 
 def hive_broadcast(op):
     from beem.transactionbuilder import TransactionBuilder
-    tx = TransactionBuilder()
+    tx = TransactionBuilder(blockchain_instance=current_app.client)
     tx.appendOps(op)
     tx.appendWif(current_app.config['ACTIVE_KEY'])
     tx.sign()
@@ -336,10 +336,10 @@ def toHtmlId(string):
 def getRevisionBody(permlink,trx_id):
     dmp = diff_match_patch()
     last_edit = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1;',(permlink,))[0]
-    hive = Blockchain()
+    hive = Blockchain(blockchain_instance=current_app.client)
     patch = []
     if(last_edit[0] == trx_id):
-        body = Comment(current_app.config['WIKI_USER']+'/'+permlink).body
+        body = Comment(current_app.config['WIKI_USER']+'/'+permlink, blockchain_instance=current_app.client).body
     else:
         timestamp = db_get_all('SELECT timestamp FROM comments WHERE trx_id=%s ORDER BY timestamp DESC LIMIT 1;',(trx_id,))[0][0]
         edits_before = db_get_all('SELECT trx_id FROM comments WHERE permlink=%s and timestamp <= %s ORDER BY timestamp ASC',(permlink,timestamp,))
@@ -367,7 +367,7 @@ def before_request():
         session.pop('userlevel',None)
     if 'username' in session.keys():
         userlevel = 0
-        account = Account(current_app.config['WIKI_USER'])
+        account = Account(current_app.config['WIKI_USER'], blockchain_instance=current_app.client)
         for key in account["posting"]["account_auths"]:
             if key[0] == session['username']:
                 userlevel = key[1]
@@ -418,7 +418,7 @@ def edit(article):
     permlink = unformatPostLink(article_f)
         
     try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink, blockchain_instance=current_app.client)
         body = Markup(xssEscape(restoreSource(post.body)))
         post.json_metadata['tags'].remove('wiki')
         return render_template('edit.html',post=post,body=body,article_title=xssEscape(post.title),pagetitle='Edit article')
@@ -436,7 +436,7 @@ def wiki(article):
     permlink = unformatPostLink(article_f)
 
     try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink, blockchain_instance=current_app.client)
         last_update = [db_get_all('SELECT timestamp FROM comments WHERE permlink=%s ORDER BY timestamp DESC LIMIT 1',(permlink,))[0][0]]
         if post.json_metadata['appdata']['user']:
             last_update.append(post.json_metadata['appdata']['user'])   
@@ -463,7 +463,7 @@ def source(article):
         return redirect(url_for('wiki.source', article=article_f),301)   
     permlink = unformatPostLink(article_f)
     try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink, blockchain_instance=current_app.client)
         return render_template('source.html',post=post,body=restoreSource(post.body),pagetitle='View source')   
     except:
         return redirect(url_for('wiki.create', article=article_f))
@@ -492,7 +492,7 @@ def history(article):
         return redirect(url_for('wiki.history', article=article_f),301)   
     permlink = unformatPostLink(article_f)
     try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink, blockchain_instance=current_app.client)
     except:
         return redirect(url_for('wiki.create', article=article_f))
         
@@ -510,7 +510,7 @@ def revision(article, trx_id):
         return redirect(url_for('wiki.revision', article=article_f, trx_id=trx_id),301)
     
     permlink = unformatPostLink(article_f)
-    hive = Blockchain()
+    hive = Blockchain(blockchain_instance=current_app.client)
     post = hive.get_transaction(trx_id)
     post = post['operations'][0]['value']
     post['json_metadata'] = json.loads(post['json_metadata'])
@@ -541,7 +541,7 @@ def compare(article, revision_1, revision_2):
     data_1 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_1,))[0]
     data_2 = db_get_all('SELECT timestamp, author, trx_id FROM comments WHERE trx_id=%s LIMIT 1',(revision_2,))[0]
     try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink, blockchain_instance=current_app.client)
     except:
         return redirect(url_for('wiki.create', article=article_f))
     return render_template('compare.html',pagetitle='Compare revisions',post=post,permlink=formatPostLink(permlink),body_1=body_1,body_2=body_2,data_1=data_1,data_2=data_2)
@@ -554,8 +554,8 @@ def talk(article):
     permlink = unformatPostLink(article)
 
     try:
-        post = Comment(current_app.config['WIKI_USER']+"/"+permlink)
-        data = Comment(current_app.config['WIKI_USER']+'/'+permlink).get_all_replies()
+        post = Comment(current_app.config['WIKI_USER']+"/"+permlink, blockchain_instance=current_app.client)
+        data = post.get_all_replies()
         replies = []
         for d in data:
             replies.append({
@@ -584,7 +584,7 @@ def category(category):
     for i, post in enumerate(data):
         posts.append({
             'article': formatPostLink(post[0]),
-            'title': Comment(current_app.config['WIKI_USER']+"/"+post[0]).title
+            'title': Comment(current_app.config['WIKI_USER']+"/"+post[0], blockchain_instance=current_app.client).title
         })
     return render_template('category.html', category=category,posts=posts,notabs=True,pagetitle=category.capitalize())
 
@@ -619,7 +619,7 @@ def admin_users():
     if(session['userlevel'] < 2):
         return redirect('/')
     
-    account = Account(current_app.config['WIKI_USER'])
+    account = Account(current_app.config['WIKI_USER'], blockchain_instance=current_app.client)
     return render_template('admin/users.html',notabs=True,auths=account["posting"]["account_auths"],pagetitle='User management')
 
 @bp.route('/admin/user/add/<username>/<int:userlevel>')
@@ -628,7 +628,7 @@ def admin_user_add(username, userlevel):
         flash('You lack the required privileges')
         return redirect('/admin/users')
     
-    wiki_user = Account(current_app.config['WIKI_USER'])
+    wiki_user = Account(current_app.config['WIKI_USER'], blockchain_instance=current_app.client)
 
     for auth in wiki_user["posting"]["account_auths"]:
         if(auth[0] == username):
@@ -652,7 +652,7 @@ def admin_user_change(username, userlevel):
         flash('You lack the required privileges')
         return redirect('/admin/users')
     
-    wiki_user = Account(current_app.config['WIKI_USER'])
+    wiki_user = Account(current_app.config['WIKI_USER'], blockchain_instance=current_app.client)
 
     for i, auth in enumerate(wiki_user["posting"]["account_auths"]):
         if(auth[0] == username):
@@ -672,7 +672,7 @@ def admin_user_delete(username):
         flash('You lack the required privileges')
         return redirect('/admin/users')
     
-    wiki_user = Account(current_app.config['WIKI_USER'])
+    wiki_user = Account(current_app.config['WIKI_USER'], blockchain_instance=current_app.client)
 
     for i, auth in enumerate(wiki_user["posting"]["account_auths"]):
         if(auth[0] == username):
@@ -692,7 +692,7 @@ def admin_user_delete(username):
 
 @bp.route('/setup')
 def setup():
-    account = Account(current_app.config['WIKI_USER'])
+    account = Account(current_app.config['WIKI_USER'], blockchain_instance=current_app.client)
     if(account["posting"]["account_auths"] == []):
         if(session['username']):
             account["posting"]["account_auths"] = [[session['username'],3]]

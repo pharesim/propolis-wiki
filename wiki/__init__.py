@@ -7,6 +7,7 @@ import redis
 
 from . import wiki
 
+from beem import Hive
 from .hive_keychain_auth.auth import hive_keychain_auth
 
 def create_app():
@@ -21,6 +22,7 @@ def create_app():
         SESSION_USE_SIGNER=True,
         DB_HOSTNAME='localhost',
         HIVE_INTERFACE="https://hive.blog",
+        HIVE_NODE="https://api.hive.blog",
         START_PAGE='Welcome-To-Propolis-Wiki',
         EDIT_GUIDELINES='How-To-Edit-Propolis-Wiki'
     )
@@ -28,6 +30,8 @@ def create_app():
     app.config.from_pyfile('config.py')
     app.config['SESSION_REDIS'] = redis.from_url(app.config['SESSION_REDIS'])
     app.secret_key = app.config['SECRET_KEY']
+
+    app.client = Hive(keys=[app.config['ACTIVE_KEY'],app.config['POSTING_KEY']], node=app.config['HIVE_NODE'])
 
     @app.errorhandler(404)
     def page_not_found(e):
