@@ -31,7 +31,8 @@ def create_app():
     app.config['SESSION_REDIS'] = redis.from_url(app.config['SESSION_REDIS'])
     app.secret_key = app.config['SECRET_KEY']
 
-    app.client = Hive(keys=[app.config['ACTIVE_KEY'],app.config['POSTING_KEY']], node=app.config['HIVE_NODE'])
+    hive_nodes = [n.strip() for n in app.config['HIVE_NODE'].split(',') if n.strip()]
+    app.client = Hive(keys=[app.config['ACTIVE_KEY'],app.config['POSTING_KEY']], node=hive_nodes)
 
     @app.errorhandler(404)
     def page_not_found(e):

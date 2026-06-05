@@ -4,6 +4,10 @@ WIKI_USER = 'wikiuser'
 POSTING_KEY = '5Jn...'
 ACTIVE_KEY = '5Jq...'
 
+# Hive RPC node(s) used by both the web app and updater.py.
+# Comma-separated for automatic failover when a node goes down.
+HIVE_NODE = 'https://api.hive.blog,https://hive-api.arcange.eu,https://api.openhive.network'
+
 DB_HOSTNAME = 'localhost',
 DATABASE = 'wiki'
 DB_USERNAME = 'wikiuser'

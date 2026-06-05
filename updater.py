@@ -96,7 +96,8 @@ def send_to_waves(title,metadata,link,permlink):
             c.reply(text, title=title+' edited', author=conf['WIKI_USER'], meta=None)
             time.sleep(5)
 
-client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']], node="https://api.deathwing.me/")
+hive_nodes = [n.strip() for n in conf.get('HIVE_NODE', 'https://api.hive.blog').split(',') if n.strip()]
+client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']], node=hive_nodes)
 
 # start from block after wiki user account creation
 startblock = 1
