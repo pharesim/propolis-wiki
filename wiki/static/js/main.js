@@ -1,4 +1,4 @@
-const version_number = '0.8.8';
+const version_number = '0.8.9';
 
 // Avoid `console` errors in browsers that lack a console.
 (function() {
