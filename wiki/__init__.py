@@ -32,7 +32,7 @@ def create_app():
     app.secret_key = app.config['SECRET_KEY']
 
     hive_nodes = [n.strip() for n in app.config['HIVE_NODE'].split(',') if n.strip()]
-    app.client = Hive(keys=[app.config['ACTIVE_KEY'],app.config['POSTING_KEY']], node=hive_nodes)
+    app.client = Hive(keys=[app.config['ACTIVE_KEY'],app.config['POSTING_KEY']], node=hive_nodes, timeout=10, num_retries=3)
 
     @app.errorhandler(404)
     def page_not_found(e):

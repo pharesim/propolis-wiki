@@ -97,7 +97,7 @@ def send_to_waves(title,metadata,link,permlink):
             time.sleep(5)
 
 hive_nodes = [n.strip() for n in conf.get('HIVE_NODE', 'https://api.hive.blog').split(',') if n.strip()]
-client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']], node=hive_nodes)
+client = Hive(keys=[conf['ACTIVE_KEY'],conf['POSTING_KEY']], node=hive_nodes, timeout=10, num_retries=3)
 
 # start from block after wiki user account creation
 startblock = 1
